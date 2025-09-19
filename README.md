@@ -1,11 +1,11 @@
-# Renesu - Full Stack Monorepo
+# React - NestJS - Full Stack Monorepo
 
 A modern full-stack application built with **NestJS** backend and **React + Vite** frontend, organized as a simple yet powerful monorepo.
 
 ## 🏗️ Project Structure
 
 ```
-renesu/
+root/
 ├── backend/          # NestJS API server
 ├── ui/              # React + Vite frontend
 ├── shared/          # Shared types and utilities
@@ -64,8 +64,8 @@ This project uses a **unified monorepo approach** that brings several key benefi
 
 1. **Clone the repository**
    ```bash
-   git clone https://github.com/saidheerajv/renesu.git
-   cd renesu
+   git clone https://github.com/saidheerajv/repo
+   cd repo
    ```
 
 2. **Install dependencies**
@@ -329,12 +329,6 @@ Included workspace settings for optimal development experience:
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🙋‍♂️ Support
-
-- **Issues**: [GitHub Issues](https://github.com/saidheerajv/renesu/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/saidheerajv/renesu/discussions)
-- **Documentation**: [Wiki](https://github.com/saidheerajv/renesu/wiki)
 
 ---
 
