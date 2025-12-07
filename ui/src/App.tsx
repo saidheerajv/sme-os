@@ -1,7 +1,5 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { CssBaseline } from '@mui/material';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import AuthPage from './components/AuthPage';
 import Dashboard from './components/Dashboard';
@@ -11,16 +9,16 @@ import LoadingScreen from './components/LoadingScreen';
 import ErrorBoundary from './components/ErrorBoundary';
 import './App.css';
 
-const theme = createTheme({
-  palette: {
-    primary: {
-      main: '#1976d2',
-    },
-    secondary: {
-      main: '#dc004e',
-    },
-  },
-});
+// const theme = createTheme({
+//   palette: {
+//     primary: {
+//       main: '#1976d2',
+//     },
+//     secondary: {
+//       main: '#dc004e',
+//     },
+//   },
+// });
 
 const AppContent: React.FC = () => {
   const { user, isLoading } = useAuth();
@@ -59,14 +57,13 @@ const AppContent: React.FC = () => {
 function App() {
   return (
     <ErrorBoundary>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
+
         <AuthProvider>
           <Router>
             <AppContent />
           </Router>
         </AuthProvider>
-      </ThemeProvider>
+
     </ErrorBoundary>
   );
 }

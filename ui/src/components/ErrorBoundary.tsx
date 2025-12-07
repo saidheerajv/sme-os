@@ -1,6 +1,7 @@
 import { Component } from 'react';
 import type { ErrorInfo, ReactNode } from 'react';
-import { Box, Typography, Button, Paper } from '@mui/material';
+import { Card, Button } from 'flowbite-react';
+import { FaExclamationTriangle } from 'react-icons/fa';
 
 interface Props {
   children: ReactNode;
@@ -28,30 +29,20 @@ class ErrorBoundary extends Component<Props, State> {
   render() {
     if (this.state.hasError) {
       return (
-        <Box
-          sx={{
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-            height: '100vh',
-            p: 2,
-          }}
-        >
-          <Paper sx={{ p: 4, maxWidth: 500, textAlign: 'center' }}>
-            <Typography variant="h5" color="error" gutterBottom>
-              Something went wrong
-            </Typography>
-            <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-              We're sorry, but something unexpected happened. Please try refreshing the page.
-            </Typography>
-            <Button
-              variant="contained"
-              onClick={() => window.location.reload()}
-            >
-              Refresh Page
-            </Button>
-          </Paper>
-        </Box>
+        <div className="flex justify-center items-center h-screen p-2">
+          <Card className="p-8 max-w-lg w-full text-center">
+            <div className="flex flex-col items-center">
+              <FaExclamationTriangle className="text-4xl text-red-500 mb-2" />
+              <h2 className="text-2xl font-bold text-red-600 mb-2">Something went wrong</h2>
+              <p className="text-gray-600 mb-4">
+                We're sorry, but something unexpected happened. Please try refreshing the page.
+              </p>
+              <Button color="failure" onClick={() => window.location.reload()}>
+                Refresh Page
+              </Button>
+            </div>
+          </Card>
+        </div>
       );
     }
 

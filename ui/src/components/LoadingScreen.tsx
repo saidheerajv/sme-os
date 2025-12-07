@@ -1,23 +1,14 @@
 import React from 'react';
-import { Box, CircularProgress, Typography } from '@mui/material';
+import { Spinner } from 'flowbite-react';
 
 const LoadingScreen: React.FC = () => {
   return (
-    <Box
-      sx={{
-        display: 'flex',
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-        height: '100vh',
-        gap: 2,
-      }}
-    >
-      <CircularProgress size={60} />
-      <Typography variant="h6" color="text.secondary">
-        Loading...
-      </Typography>
-    </Box>
+    <div className="flex flex-col justify-center items-center h-screen gap-4">
+      <Spinner size="xl" aria-label="Loading" className="text-blue-500" />
+      {/* Alternatively, use FaSpinner for a custom icon: */}
+      {/* <FaSpinner className="animate-spin text-5xl text-blue-500" /> */}
+      <span className="text-lg text-gray-500 font-medium">Loading...</span>
+    </div>
   );
 };
 

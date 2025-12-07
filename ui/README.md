@@ -5,14 +5,14 @@ This React frontend provides a complete authentication interface for the CMS pla
 ## Features
 
 ### 🔐 Authentication Flow
-- **Landing Page**: Clean login/signup forms with Material-UI components
+- **Landing Page**: Clean login/signup forms with Flowbite-React components
 - **JWT Integration**: Automatic token management and API integration
 - **Protected Routes**: Dashboard and other protected pages require authentication
 - **Persistent Sessions**: Tokens are stored in localStorage for session persistence
 - **Automatic Logout**: Logout button clears session and redirects to login
 
 ### 🎨 UI Components
-- **Material-UI Design System**: Modern, responsive interface
+- **Flowbite-React Design System**: Modern, responsive interface
 - **Tabbed Authentication**: Switch between login and signup forms
 - **Loading States**: Spinner indicators during API calls
 - **Error Handling**: User-friendly error messages
@@ -119,7 +119,7 @@ Wraps components that require authentication:
 Combined login/signup interface:
 - Tabbed interface for switching between forms
 - Form validation and error display
-- Material-UI components for consistent design
+- Flowbite-React components for consistent design
 - Automatic redirect after successful authentication
 
 ### Dashboard
@@ -127,14 +127,14 @@ Protected dashboard page:
 - Displays user information
 - Navigation bar with logout
 - Placeholder for CMS features
-- Responsive Material-UI layout
+- Responsive Flowbite-React layout
 
 ## Styling
 
 The application uses:
-- **Material-UI**: Complete design system with components and theming
-- **CssBaseline**: Consistent browser default styles
-- **Custom Theme**: Primary and secondary color configuration
+- **Flowbite-React**: Complete design system with components and theming
+- **Tailwind CSS**: Consistent browser default styles
+- **Custom Theme**: Flowbite and Tailwind color configuration
 - **Responsive Design**: Mobile-first responsive layouts
 
 ## Error Handling

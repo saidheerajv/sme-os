@@ -1,30 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import {
-  Box,
-  Container,
-  Typography,
-  Button,
-  Card,
-  CardContent,
-  CardActions,
-  Chip,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  IconButton,
-  Snackbar,
-  Alert,
-  Paper,
-  Divider,
-} from '@mui/material';
-import {
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  ArrowBack as ArrowBackIcon,
-  Code as CodeIcon,
-} from '@mui/icons-material';
+import { Card, Button, Badge, Modal, Alert } from 'flowbite-react';
+import { HiPlus, HiPencil, HiTrash, HiArrowLeft, HiCode } from 'react-icons/hi';
 import { useNavigate } from 'react-router-dom';
 import { entityDefinitionsApi } from '../services/entityDefinitions.api';
 import type { EntityDefinition, FieldDefinition } from '../types/entity.types';
@@ -111,15 +87,15 @@ const EntityDefinitionsPage: React.FC = () => {
   };
 
   const getFieldTypeColor = (type: string) => {
-    const colors: { [key: string]: 'primary' | 'secondary' | 'success' | 'warning' | 'error' | 'info' } = {
-      [FieldType.STRING]: 'primary',
-      [FieldType.NUMBER]: 'secondary',
+    const colors: { [key: string]: string } = {
+      [FieldType.STRING]: 'info',
+      [FieldType.NUMBER]: 'purple',
       [FieldType.BOOLEAN]: 'success',
-      [FieldType.EMAIL]: 'info',
+      [FieldType.EMAIL]: 'indigo',
       [FieldType.DATE]: 'warning',
-      [FieldType.URL]: 'error',
+      [FieldType.URL]: 'failure',
     };
-    return colors[type] || 'default';
+    return colors[type] || 'gray';
   };
 
   const renderFieldConstraints = (field: FieldDefinition) => {
@@ -139,191 +115,120 @@ const EntityDefinitionsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
-        <Typography>Loading...</Typography>
-      </Container>
+      <div className="max-w-6xl mx-auto mt-8 mb-8">
+        <div className="text-lg">Loading...</div>
+      </div>
     );
   }
 
   return (
-    <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+    <div className="max-w-6xl mx-auto mt-8 mb-8">
       {/* Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', mb: 3 }}>
-        <IconButton onClick={() => navigate('/dashboard')} sx={{ mr: 2 }}>
-          <ArrowBackIcon />
-        </IconButton>
-        <Typography variant="h4" component="h1" sx={{ flexGrow: 1 }}>
-          Entity Definitions
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={handleCreateEntity}
-        >
-          Create Entity
+      <div className="flex items-center mb-6">
+        <Button color="light" onClick={() => navigate('/dashboard')} className="mr-2" size="sm">
+          <HiArrowLeft className="w-5 h-5 mr-1" /> Back
         </Button>
-      </Box>
+        <h1 className="text-3xl font-bold grow">Entity Definitions</h1>
+        <Button color="blue" onClick={handleCreateEntity} size="sm">
+          <HiPlus className="w-5 h-5 mr-1" /> Create Entity
+        </Button>
+      </div>
 
       {/* Description */}
-      <Paper sx={{ p: 3, mb: 3 }}>
-        <Typography variant="h6" gutterBottom>
-          Dynamic Entity Management
-        </Typography>
-        <Typography variant="body2" color="text.secondary">
-          Create and manage dynamic entity definitions that will automatically generate CRUD APIs. 
-          Each entity can have custom fields with validation rules and constraints.
-        </Typography>
-      </Paper>
+      <Card className="mb-6">
+        <h2 className="text-xl font-semibold mb-2">Dynamic Entity Management</h2>
+        <p className="text-gray-600 text-sm">
+          Create and manage dynamic entity definitions that will automatically generate CRUD APIs. Each entity can have custom fields with validation rules and constraints.
+        </p>
+      </Card>
 
       {/* Entity Cards */}
       {entities.length === 0 ? (
-        <Paper sx={{ p: 4, textAlign: 'center' }}>
-          <CodeIcon sx={{ fontSize: 48, color: 'text.secondary', mb: 2 }} />
-          <Typography variant="h6" color="text.secondary" gutterBottom>
-            No Entity Definitions Found
-          </Typography>
-          <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Create your first entity definition to get started with dynamic content management.
-          </Typography>
-          <Button
-            variant="contained"
-            startIcon={<AddIcon />}
-            onClick={handleCreateEntity}
-          >
-            Create Your First Entity
+        <Card className="p-8 text-center">
+          <HiCode className="mx-auto mb-4 text-gray-400" style={{ fontSize: 48 }} />
+          <h2 className="text-lg text-gray-500 mb-2">No Entity Definitions Found</h2>
+          <p className="text-gray-400 mb-4">Create your first entity definition to get started with dynamic content management.</p>
+          <Button color="blue" onClick={handleCreateEntity}>
+            <HiPlus className="w-5 h-5 mr-1" /> Create Your First Entity
           </Button>
-        </Paper>
+        </Card>
       ) : (
-        <Box sx={{ 
-          display: 'grid', 
-          gridTemplateColumns: { xs: '1fr', md: 'repeat(2, 1fr)', lg: 'repeat(3, 1fr)' },
-          gap: 3 
-        }}>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {entities.map((entity) => (
-            <Card key={entity.id} sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-              <CardContent sx={{ flexGrow: 1 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'start', mb: 2 }}>
-                  <Typography variant="h6" component="h2">
-                    {entity.name}
-                  </Typography>
-                  <Chip label={`${entity.fields.length} fields`} size="small" />
-                </Box>
-                
-                <Typography variant="body2" color="text.secondary" gutterBottom>
-                  Table: {entity.tableName}
-                </Typography>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Typography variant="subtitle2" gutterBottom>
-                  Fields:
-                </Typography>
-                <Box sx={{ maxHeight: 150, overflowY: 'auto' }}>
-                  {entity.fields.map((field, index) => (
-                    <Box key={index} sx={{ mb: 1 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 0.5 }}>
-                        <Typography variant="body2" fontWeight="medium">
-                          {field.name}
-                        </Typography>
-                        <Chip
-                          label={field.type}
-                          size="small"
-                          color={getFieldTypeColor(field.type)}
-                          variant="outlined"
-                        />
-                      </Box>
-                      {renderFieldConstraints(field) && (
-                        <Typography variant="caption" color="text.secondary">
-                          {renderFieldConstraints(field)}
-                        </Typography>
-                      )}
-                    </Box>
-                  ))}
-                </Box>
-
-                <Divider sx={{ my: 2 }} />
-
-                <Typography variant="caption" color="text.secondary">
-                  Created: {new Date(entity.createdAt).toLocaleDateString()}
-                </Typography>
-              </CardContent>
-
-              <CardActions>
-                <Button
-                  size="small"
-                  startIcon={<EditIcon />}
-                  onClick={() => handleEditEntity(entity)}
-                >
-                  Edit
+            <Card key={entity.id} className="flex flex-col h-full">
+              <div className="flex justify-between items-start mb-2">
+                <h2 className="text-lg font-semibold">{entity.name}</h2>
+                <Badge color="info">{entity.fields.length} fields</Badge>
+              </div>
+              <p className="text-gray-500 text-sm mb-2">Table: {entity.tableName}</p>
+              <hr className="my-2" />
+              <div className="font-medium text-sm mb-1">Fields:</div>
+              <div className="max-h-40 overflow-y-auto">
+                {entity.fields.map((field, index) => (
+                  <div key={index} className="mb-2">
+                    <div className="flex items-center gap-2 mb-1">
+                      <span className="font-medium text-sm">{field.name}</span>
+                      <Badge color={getFieldTypeColor(field.type)}>{field.type}</Badge>
+                    </div>
+                    {renderFieldConstraints(field) && (
+                      <span className="text-xs text-gray-400">{renderFieldConstraints(field)}</span>
+                    )}
+                  </div>
+                ))}
+              </div>
+              <hr className="my-2" />
+              <span className="text-xs text-gray-400">Created: {new Date(entity.createdAt).toLocaleDateString()}</span>
+              <div className="flex gap-2 mt-4">
+                <Button color="light" size="xs" onClick={() => handleEditEntity(entity)}>
+                  <HiPencil className="w-4 h-4 mr-1" /> Edit
                 </Button>
-                <Button
-                  size="small"
-                  color="error"
-                  startIcon={<DeleteIcon />}
-                  onClick={() => handleDeleteEntity(entity)}
-                >
-                  Delete
+                <Button color="failure" size="xs" onClick={() => handleDeleteEntity(entity)}>
+                  <HiTrash className="w-4 h-4 mr-1" /> Delete
                 </Button>
-              </CardActions>
+              </div>
             </Card>
           ))}
-        </Box>
+        </div>
       )}
 
-      {/* Entity Form Dialog */}
-      <Dialog
-        open={isFormOpen}
-        onClose={() => setIsFormOpen(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>
-          {selectedEntity ? 'Edit Entity Definition' : 'Create Entity Definition'}
-        </DialogTitle>
-        <DialogContent>
+      {/* Entity Form Modal */}
+      <Modal show={isFormOpen} onClose={() => setIsFormOpen(false)} size="xl">
+        <div className="p-4">
+          <h3 className="text-lg font-semibold mb-4">
+            {selectedEntity ? 'Edit Entity Definition' : 'Create Entity Definition'}
+          </h3>
           <EntityDefinitionForm
             initialData={selectedEntity}
             onSubmit={handleFormSubmit}
             onCancel={() => setIsFormOpen(false)}
           />
-        </DialogContent>
-      </Dialog>
+        </div>
+      </Modal>
 
-      {/* Delete Confirmation Dialog */}
-      <Dialog
-        open={isDeleteConfirmOpen}
-        onClose={() => setIsDeleteConfirmOpen(false)}
-      >
-        <DialogTitle>Confirm Delete</DialogTitle>
-        <DialogContent>
-          <Typography>
+      {/* Delete Confirmation Modal */}
+      <Modal show={isDeleteConfirmOpen} onClose={() => setIsDeleteConfirmOpen(false)}>
+        <div className="p-4">
+          <h3 className="text-lg font-semibold mb-4">Confirm Delete</h3>
+          <p className="mb-4">
             Are you sure you want to delete the entity definition "{entityToDelete?.name}"?
             This action cannot be undone and will also delete all data instances of this entity.
-          </Typography>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setIsDeleteConfirmOpen(false)}>Cancel</Button>
-          <Button onClick={confirmDelete} color="error" variant="contained">
-            Delete
-          </Button>
-        </DialogActions>
-      </Dialog>
+          </p>
+          <div className="flex gap-2 justify-end">
+            <Button color="light" onClick={() => setIsDeleteConfirmOpen(false)}>Cancel</Button>
+            <Button color="failure" onClick={confirmDelete}>Delete</Button>
+          </div>
+        </div>
+      </Modal>
 
-      {/* Snackbar */}
-      <Snackbar
-        open={snackbar.open}
-        autoHideDuration={6000}
-        onClose={() => setSnackbar({ ...snackbar, open: false })}
-      >
-        <Alert
-          onClose={() => setSnackbar({ ...snackbar, open: false })}
-          severity={snackbar.severity}
-          sx={{ width: '100%' }}
-        >
-          {snackbar.message}
-        </Alert>
-      </Snackbar>
-    </Container>
+      {/* Snackbar/Alert */}
+      {snackbar.open && (
+        <div className="fixed bottom-4 right-4 z-50">
+          <Alert color={snackbar.severity === 'success' ? 'success' : 'failure'} onDismiss={() => setSnackbar({ ...snackbar, open: false })}>
+            {snackbar.message}
+          </Alert>
+        </div>
+      )}
+    </div>
   );
 };
 

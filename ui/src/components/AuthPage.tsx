@@ -1,50 +1,20 @@
+
 import React, { useState } from 'react';
-import {
-  Container,
-  Paper,
-  TextField,
-  Button,
-  Typography,
-  Box,
-  Alert,
-  CircularProgress,
-  Tab,
-  Tabs,
-} from '@mui/material';
+import { Card, Button, Spinner, Alert, TextInput, Label } from 'flowbite-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`auth-tabpanel-${index}`}
-      aria-labelledby={`auth-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
+// ...existing code...
 
 const AuthPage: React.FC = () => {
-  const [tab, setTab] = useState(0);
+  const [tab, setTab] = useState<'login' | 'signup'>('login');
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [signupData, setSignupData] = useState({ email: '', password: '', name: '' });
   const { login, signup, isLoading, error } = useAuth();
   const navigate = useNavigate();
 
-  const handleTabChange = (_event: React.SyntheticEvent, newValue: number) => {
-    setTab(newValue);
+  const handleTabChange = (tabKey: 'login' | 'signup') => {
+    setTab(tabKey);
   };
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -68,132 +38,123 @@ const AuthPage: React.FC = () => {
   };
 
   return (
-    <Container component="main" maxWidth="sm">
-      <Box
-        sx={{
-          marginTop: 8,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Paper elevation={3} sx={{ width: '100%', mt: 3 }}>
-          <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-            <Tabs value={tab} onChange={handleTabChange} aria-label="auth tabs" centered>
-              <Tab label="Login" id="auth-tab-0" aria-controls="auth-tabpanel-0" />
-              <Tab label="Sign Up" id="auth-tab-1" aria-controls="auth-tabpanel-1" />
-            </Tabs>
-          </Box>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
+      <Card className="w-full max-w-md p-6">
+        <div className="flex mb-4 border-b">
+          <button
+            className={`flex-1 py-2 text-center font-semibold ${tab === 'login' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}
+            onClick={() => handleTabChange('login')}
+            type="button"
+          >
+            Login
+          </button>
+          <button
+            className={`flex-1 py-2 text-center font-semibold ${tab === 'signup' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}
+            onClick={() => handleTabChange('signup')}
+            type="button"
+          >
+            Sign Up
+          </button>
+        </div>
 
-          {error && (
-            <Alert severity="error" sx={{ m: 2 }}>
-              {error}
-            </Alert>
-          )}
+        {error && (
+          <Alert color="failure" className="mb-4">
+            {error}
+          </Alert>
+        )}
 
-          <TabPanel value={tab} index={0}>
-            <Typography component="h1" variant="h4" align="center" gutterBottom>
-              Welcome Back
-            </Typography>
-            <Typography variant="body2" align="center" color="text.secondary" gutterBottom>
-              Sign in to your account
-            </Typography>
-            
-            <Box component="form" onSubmit={handleLogin} sx={{ mt: 2 }}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="login-email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-                autoFocus
-                value={loginData.email}
-                onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="login-password"
-                autoComplete="current-password"
-                value={loginData.password}
-                onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-              />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-                disabled={isLoading}
-              >
-                {isLoading ? <CircularProgress size={24} /> : 'Sign In'}
+        {tab === 'login' && (
+          <div>
+            <h1 className="text-2xl font-bold text-center mb-2">Welcome Back</h1>
+            <p className="text-center text-gray-500 mb-4">Sign in to your account</p>
+            <form className="space-y-4" onSubmit={handleLogin}>
+              <div>
+                <Label htmlFor="login-email">Email Address</Label>
+                <TextInput
+                  id="login-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  autoFocus
+                  value={loginData.email}
+                  onChange={(e) => setLoginData({ ...loginData, email: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="login-password">Password</Label>
+                <TextInput
+                  id="login-password"
+                  name="password"
+                  type="password"
+                  autoComplete="current-password"
+                  required
+                  value={loginData.password}
+                  onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <Button type="submit" color="blue" className="w-full" disabled={isLoading}>
+                {isLoading ? <Spinner size="sm" /> : 'Sign In'}
               </Button>
-            </Box>
-          </TabPanel>
+            </form>
+          </div>
+        )}
 
-          <TabPanel value={tab} index={1}>
-            <Typography component="h1" variant="h4" align="center" gutterBottom>
-              Create Account
-            </Typography>
-            <Typography variant="body2" align="center" color="text.secondary" gutterBottom>
-              Join our CMS platform
-            </Typography>
-            
-            <Box component="form" onSubmit={handleSignup} sx={{ mt: 2 }}>
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="signup-name"
-                label="Full Name"
-                name="name"
-                autoComplete="name"
-                autoFocus
-                value={signupData.name}
-                onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                id="signup-email"
-                label="Email Address"
-                name="email"
-                autoComplete="email"
-                value={signupData.email}
-                onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
-              />
-              <TextField
-                margin="normal"
-                required
-                fullWidth
-                name="password"
-                label="Password"
-                type="password"
-                id="signup-password"
-                autoComplete="new-password"
-                value={signupData.password}
-                onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
-              />
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                sx={{ mt: 3, mb: 2 }}
-                disabled={isLoading}
-              >
-                {isLoading ? <CircularProgress size={24} /> : 'Sign Up'}
+        {tab === 'signup' && (
+          <div>
+            <h1 className="text-2xl font-bold text-center mb-2">Create Account</h1>
+            <p className="text-center text-gray-500 mb-4">Join our CMS platform</p>
+            <form className="space-y-4" onSubmit={handleSignup}>
+              <div>
+                <Label htmlFor="signup-name">Full Name</Label>
+                <TextInput
+                  id="signup-name"
+                  name="name"
+                  type="text"
+                  autoComplete="name"
+                  required
+                  autoFocus
+                  value={signupData.name}
+                  onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="signup-email">Email Address</Label>
+                <TextInput
+                  id="signup-email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
+                  required
+                  value={signupData.email}
+                  onChange={(e) => setSignupData({ ...signupData, email: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <div>
+                <Label htmlFor="signup-password">Password</Label>
+                <TextInput
+                  id="signup-password"
+                  name="password"
+                  type="password"
+                  autoComplete="new-password"
+                  required
+                  value={signupData.password}
+                  onChange={(e) => setSignupData({ ...signupData, password: e.target.value })}
+                  className="mt-1"
+                />
+              </div>
+              <Button type="submit" color="blue" className="w-full" disabled={isLoading}>
+                {isLoading ? <Spinner size="sm" /> : 'Sign Up'}
               </Button>
-            </Box>
-          </TabPanel>
-        </Paper>
-      </Box>
-    </Container>
+            </form>
+          </div>
+        )}
+      </Card>
+    </div>
   );
 };
 

@@ -1,16 +1,10 @@
 import React from 'react';
 import {
-  AppBar,
-  Toolbar,
-  Typography,
+  Navbar,
   Button,
-  Container,
-  Box,
-  Paper,
   Card,
-  CardContent,
-} from '@mui/material';
-import { LogoutOutlined, PersonOutlined, DashboardOutlined } from '@mui/icons-material';
+} from 'flowbite-react';
+import { FaSignOutAlt, FaUser, FaTachometerAlt } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -24,134 +18,80 @@ const Dashboard: React.FC = () => {
   };
 
   return (
-    <Box sx={{ flexGrow: 1 }}>
-      {/* App Bar */}
-      <AppBar position="static">
-        <Toolbar>
-          <DashboardOutlined sx={{ mr: 2 }} />
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            CMS Dashboard
-          </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-              <PersonOutlined />
-              <Typography variant="body2">
-                {user?.name}
-              </Typography>
-            </Box>
-            <Button
-              color="inherit"
-              onClick={handleLogout}
-              startIcon={<LogoutOutlined />}
-            >
-              Logout
-            </Button>
-          </Box>
-        </Toolbar>
-      </AppBar>
+    <div className="min-h-screen bg-gray-50">
+      {/* Navbar */}
+      <Navbar fluid rounded className="bg-linear-to-r from-pink-400 to-orange-400 text-white">
+        <a href="#" className="flex items-center">
+          <FaTachometerAlt className="mr-2 text-xl" />
+          <span className="self-center whitespace-nowrap text-xl font-semibold">CMS Dashboard</span>
+        </a>
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2">
+            <FaUser />
+            <span className="text-sm">{user?.name}</span>
+          </div>
+          <Button color="light" onClick={handleLogout} className="flex items-center gap-2">
+            <FaSignOutAlt /> Logout
+          </Button>
+        </div>
+      </Navbar>
 
       {/* Main Content */}
-      <Container maxWidth="lg" sx={{ mt: 4, mb: 4 }}>
+      <div className="container mx-auto mt-8 mb-8">
         {/* Welcome Card */}
-        <Paper
-          sx={{
-            p: 3,
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            background: 'linear-gradient(45deg, #FE6B8B 30%, #FF8E53 90%)',
-            color: 'white',
-            mb: 3,
-          }}
-        >
-          <Typography component="h1" variant="h4" gutterBottom>
-            Welcome to Your CMS Dashboard
-          </Typography>
-          <Typography variant="h6" align="center">
-            Hello, {user?.name}! You are successfully logged in.
-          </Typography>
-          <Typography variant="body1" align="center" sx={{ mt: 1, opacity: 0.9 }}>
-            Email: {user?.email}
-          </Typography>
-        </Paper>
+        <Card className="mb-6 bg-linear-to-r from-pink-400 to-orange-400 text-white text-center">
+          <h1 className="text-3xl font-bold mb-2">Welcome to Your CMS Dashboard</h1>
+          <h2 className="text-xl mb-1">Hello, {user?.name}! You are successfully logged in.</h2>
+          <p className="opacity-90">Email: {user?.email}</p>
+        </Card>
 
         {/* Feature Cards */}
-        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 2, mb: 3 }}>
-          <Box sx={{ flex: '1 1 300px', minWidth: 300 }}>
+        <div className="flex flex-wrap gap-4 mb-6">
+          <div className="flex-1 min-w-[300px]">
             <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Entity Definitions
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Create and manage your content entity definitions
-                </Typography>
-                <Button variant="outlined" sx={{ mt: 2 }} fullWidth onClick={() => navigate('/entity-definitions')}>
-                  Manage Entities
-                </Button>
-              </CardContent>
+              <h3 className="text-lg font-semibold mb-2">Entity Definitions</h3>
+              <p className="text-sm text-gray-500">Create and manage your content entity definitions</p>
+              <Button color="light" className="mt-3 w-full" onClick={() => navigate('/entity-definitions')}>
+                Manage Entities
+              </Button>
             </Card>
-          </Box>
-
-          <Box sx={{ flex: '1 1 300px', minWidth: 300 }}>
+          </div>
+          <div className="flex-1 min-w-[300px]">
             <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Content Management
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Create, edit, and organize your content
-                </Typography>
-                <Button variant="outlined" sx={{ mt: 2 }} fullWidth>
-                  Manage Content
-                </Button>
-              </CardContent>
+              <h3 className="text-lg font-semibold mb-2">Content Management</h3>
+              <p className="text-sm text-gray-500">Create, edit, and organize your content</p>
+              <Button color="light" className="mt-3 w-full">
+                Manage Content
+              </Button>
             </Card>
-          </Box>
-
-          <Box sx={{ flex: '1 1 300px', minWidth: 300 }}>
+          </div>
+          <div className="flex-1 min-w-[300px]">
             <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Settings
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Configure your account and preferences
-                </Typography>
-                <Button variant="outlined" sx={{ mt: 2 }} fullWidth>
-                  View Settings
-                </Button>
-              </CardContent>
+              <h3 className="text-lg font-semibold mb-2">Settings</h3>
+              <p className="text-sm text-gray-500">Configure your account and preferences</p>
+              <Button color="light" className="mt-3 w-full">
+                View Settings
+              </Button>
             </Card>
-          </Box>
-        </Box>
+          </div>
+        </div>
 
         {/* User Info Card */}
-        <Paper sx={{ p: 3 }}>
-          <Typography variant="h6" gutterBottom>
-            Account Information
-          </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 4 }}>
-            <Box sx={{ flex: 1, minWidth: 200 }}>
-              <Typography variant="body2" color="text.secondary">
-                User ID
-              </Typography>
-              <Typography variant="body1">
-                {user?.id}
-              </Typography>
-            </Box>
-            <Box sx={{ flex: 1, minWidth: 200 }}>
-              <Typography variant="body2" color="text.secondary">
-                Member Since
-              </Typography>
-              <Typography variant="body1">
-                {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
-              </Typography>
-            </Box>
-          </Box>
-        </Paper>
-      </Container>
-    </Box>
+        <Card className="p-6">
+          <h3 className="text-lg font-semibold mb-4">Account Information</h3>
+          <div className="flex flex-wrap gap-8">
+            <div className="flex-1 min-w-[200px]">
+              <p className="text-sm text-gray-500">User ID</p>
+              <p className="text-base">{user?.id}</p>
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <p className="text-sm text-gray-500">Member Since</p>
+              <p className="text-base">{user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}</p>
+            </div>
+          </div>
+        </Card>
+      </div>
+    </div>
   );
 };
 
