@@ -1,14 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Badge, Modal, Alert } from 'flowbite-react';
-import { HiPlus, HiPencil, HiTrash, HiArrowLeft, HiCode } from 'react-icons/hi';
-import { useNavigate } from 'react-router-dom';
+import { HiPlus, HiPencil, HiTrash, HiCode } from 'react-icons/hi';
 import { entityDefinitionsApi } from '../services/entityDefinitions.api';
 import type { EntityDefinition, FieldDefinition } from '../types/entity.types';
 import { FieldType } from '../types/entity.types';
 import EntityDefinitionForm from './EntityDefinitionForm';
 
 const EntityDefinitionsPage: React.FC = () => {
-  const navigate = useNavigate();
   const [entities, setEntities] = useState<EntityDefinition[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEntity, setSelectedEntity] = useState<EntityDefinition | null>(null);
@@ -100,7 +98,7 @@ const EntityDefinitionsPage: React.FC = () => {
 
   const renderFieldConstraints = (field: FieldDefinition) => {
     const constraints = [];
-    
+
     if (field.required) constraints.push('Required');
     if (field.unique) constraints.push('Unique');
     if (field.minLength) constraints.push(`Min: ${field.minLength}`);
@@ -125,9 +123,7 @@ const EntityDefinitionsPage: React.FC = () => {
     <div className="max-w-6xl mx-auto mt-8 mb-8">
       {/* Header */}
       <div className="flex items-center mb-6">
-        <Button color="light" onClick={() => navigate('/dashboard')} className="mr-2" size="sm">
-          <HiArrowLeft className="w-5 h-5 mr-1" /> Back
-        </Button>
+
         <h1 className="text-3xl font-bold grow">Entity Definitions</h1>
         <Button color="blue" onClick={handleCreateEntity} size="sm">
           <HiPlus className="w-5 h-5 mr-1" /> Create Entity
