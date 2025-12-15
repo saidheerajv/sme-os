@@ -5,6 +5,7 @@ import AuthPage from './components/AuthPage';
 import DashboardLayout from './components/DashboardLayout';
 import DashboardHome from './components/DashboardHome';
 import EntityDefinitionsPage from './components/EntityDefinitionsPage';
+import EntityContentPage from './components/EntityContentPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingScreen from './components/LoadingScreen';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -34,6 +35,7 @@ const AppContent: React.FC = () => {
       >
         <Route index element={<Navigate to="entity-definitions" replace />} />
         <Route path="entity-definitions" element={<EntityDefinitionsPage />} />
+        <Route path="content/:entityName" element={<EntityContentPage />} />
         <Route path="overview" element={<DashboardHome />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
