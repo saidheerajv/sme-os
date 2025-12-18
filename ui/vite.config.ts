@@ -6,6 +6,9 @@ import flowbiteReact from 'flowbite-react/plugin/vite'
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss(), flowbiteReact()],
+  optimizeDeps: {
+    include: ['react', 'react-dom', '@tanstack/react-table']
+  },
   server: {
     proxy: {
       '/api': {
