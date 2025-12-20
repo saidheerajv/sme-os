@@ -1,19 +1,14 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { Card, Button, Modal, TextInput, Label, Checkbox, Spinner, Alert } from 'flowbite-react';
-import {
-  useReactTable,
-  getCoreRowModel,
-  flexRender,
-  createColumnHelper,
-  type ColumnDef,
-} from '@tanstack/react-table';
 import { entityDefinitionsApi } from '../services/entityDefinitions.api';
 import { entitiesApi, type EntityRecord } from '../services/entities.api';
 import type { EntityDefinition, FieldDefinition } from '../types/entity.types';
-import { HiPlus, HiPencil, HiTrash } from 'react-icons/hi';
+import { HiPlus } from 'react-icons/hi';
+import DataTable from './DataTable';
 
 const EntityContentPage: React.FC = () => {
+
     const { entityName } = useParams<{ entityName: string }>();
     const [entitySchema, setEntitySchema] = useState<EntityDefinition | null>(null);
     const [entityData, setEntityData] = useState<EntityRecord[]>([]);
@@ -32,12 +27,15 @@ const EntityContentPage: React.FC = () => {
             setLoading(true);
             setError(null);
             try {
-                const [schema, data] = await Promise.all([
+                const [schema, data]:any = await Promise.all([
                     entityDefinitionsApi.getByName(entityName),
                     entitiesApi.getAll(entityName)
                 ]);
+
+                console.log('Fetched entity schema:', schema);
+                console.log('Fetched entity data:', data);
                 setEntitySchema(schema);
-                setEntityData(data);
+                setEntityData(data.data.map((item: any) => item.data));
             } catch (err: any) {
                 setError(err.response?.data?.message || 'Failed to load entity data');
             } finally {
@@ -48,58 +46,8 @@ const EntityContentPage: React.FC = () => {
         fetchData();
     }, [entityName]);
 
-    // Generate table columns from schema
-    const columns = useMemo<ColumnDef<EntityRecord, any>[]>(() => {
-        if (!entitySchema) return [];
 
-        const columnHelper = createColumnHelper<EntityRecord>();
-        
-        const fieldColumns = entitySchema.fields.map(field =>
-            columnHelper.accessor(field.name, {
-                header: field.name.charAt(0).toUpperCase() + field.name.slice(1),
-                cell: info => formatCellValue(info.getValue(), field.type),
-            })
-        );
 
-        const actionsColumn = columnHelper.display({
-            id: 'actions',
-            header: 'Actions',
-            cell: props => (
-                <div className="flex gap-2">
-                    <Button size="xs" color="light" onClick={() => handleEdit(props.row.original)}>
-                        <HiPencil className="h-4 w-4" />
-                    </Button>
-                    <Button size="xs" color="failure" onClick={() => handleDelete(props.row.original.id)}>
-                        <HiTrash className="h-4 w-4" />
-                    </Button>
-                </div>
-            ),
-        });
-
-        return [...fieldColumns, actionsColumn];
-    }, [entitySchema]);
-
-    const table = useReactTable({
-        data: entityData,
-        columns,
-        getCoreRowModel: getCoreRowModel(),
-    });
-
-    // Format cell values based on field type
-    const formatCellValue = (value: any, type: string) => {
-        if (value === null || value === undefined) return '-';
-        
-        switch (type) {
-            case 'boolean':
-                return value ? '✓' : '✗';
-            case 'date':
-                return new Date(value).toLocaleDateString();
-            case 'url':
-                return <a href={value} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline">{value}</a>;
-            default:
-                return String(value);
-        }
-    };
 
     // Handle create/edit modal
     const handleCreate = () => {
@@ -110,21 +58,22 @@ const EntityContentPage: React.FC = () => {
 
     const handleEdit = (record: EntityRecord) => {
         setEditingRecord(record);
-        const { id, userId, createdAt, updatedAt, ...formDataCopy } = record;
-        setFormData(formDataCopy);
+        setFormData(record);
         setShowModal(true);
     };
 
-    const handleDelete = async (id: string) => {
+    const handleDelete = async (record: EntityRecord) => {
         if (!entityName || !confirm('Are you sure you want to delete this record?')) return;
         
         try {
-            await entitiesApi.delete(entityName, id);
-            setEntityData(prev => prev.filter(item => item.id !== id));
+            await entitiesApi.delete(entityName, record.id);
+            setEntityData(prev => prev.filter(item => item.id !== record.id));
         } catch (err: any) {
             alert(err.response?.data?.message || 'Failed to delete record');
         }
     };
+
+
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -136,8 +85,10 @@ const EntityContentPage: React.FC = () => {
                 const updated = await entitiesApi.update(entityName, editingRecord.id, formData);
                 setEntityData(prev => prev.map(item => item.id === editingRecord.id ? updated : item));
             } else {
-                const created = await entitiesApi.create(entityName, formData);
-                setEntityData(prev => [...prev, created]);
+                await entitiesApi.create(entityName, formData);
+                // Refresh data after creation
+                const data: any = await entitiesApi.getAll(entityName);
+                setEntityData(data.data);
             }
             setShowModal(false);
             setFormData({});
@@ -271,45 +222,17 @@ const EntityContentPage: React.FC = () => {
                         <p className="text-sm mt-2">Click "Add New" to create your first record</p>
                     </div>
                 ) : (
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-sm text-left text-gray-500">
-                            <thead className="text-xs text-gray-700 uppercase bg-gray-50">
-                                {table.getHeaderGroups().map(headerGroup => (
-                                    <tr key={headerGroup.id}>
-                                        {headerGroup.headers.map(header => (
-                                            <th key={header.id} scope="col" className="px-6 py-3">
-                                                {header.isPlaceholder
-                                                    ? null
-                                                    : flexRender(
-                                                        header.column.columnDef.header,
-                                                        header.getContext()
-                                                    )}
-                                            </th>
-                                        ))}
-                                    </tr>
-                                ))}
-                            </thead>
-                            <tbody>
-                                {table.getRowModel().rows.map(row => (
-                                    <tr key={row.id} className="bg-white border-b hover:bg-gray-50">
-                                        {row.getVisibleCells().map(cell => (
-                                            <td key={cell.id} className="px-6 py-4">
-                                                {flexRender(
-                                                    cell.column.columnDef.cell,
-                                                    cell.getContext()
-                                                )}
-                                            </td>
-                                        ))}
-                                    </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    </div>
+                    <DataTable 
+                        data={entityData} 
+                        schema={entitySchema} 
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                    />
                 )}
             </Card>
 
             {/* Create/Edit Modal */}
-            <Modal show={showModal} onClose={() => setShowModal(false)}>
+            <Modal show={showModal} onClose={() => setShowModal(false)} position="center-right">
                 <div className="p-6">
                     <h3 className="text-xl font-semibold mb-4">
                         {editingRecord ? 'Edit Record' : 'Create New Record'}

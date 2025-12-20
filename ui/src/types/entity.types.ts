@@ -26,6 +26,7 @@ export interface FieldDefinition {
   
   // Default value
   defaultValue?: any;
+  displayInDataTable?: boolean;
 }
 
 export interface EntityDefinition {

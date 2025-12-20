@@ -7,6 +7,8 @@ import { EntityDefinitionsModule } from './entity-definitions/entity-definitions
 import { DynamicEntitiesModule } from './dynamic-entities/dynamic-entities.module';
 import { AuthModule } from './auth/auth.module';
 import { EntityDefinitionsService } from './entity-definitions/entity-definitions.service';
+// import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 
 @Module({
   imports: [
@@ -15,6 +17,10 @@ import { EntityDefinitionsService } from './entity-definitions/entity-definition
     EntityDefinitionsModule,
     DynamicEntitiesModule,
     AuthModule,
+    // ServeStaticModule.forRoot({
+    //   rootPath: join(__dirname, '..', 'blueprints'),
+    //   serveRoot: '/blueprints',
+    // }),
   ],
   controllers: [AppController],
   providers: [AppService],
