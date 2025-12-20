@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { Card, Button, Modal, TextInput, Label, Checkbox, Spinner, Alert } from 'flowbite-react';
+import { Card, Button, Spinner, Alert } from 'flowbite-react';
 import { entityDefinitionsApi } from '../services/entityDefinitions.api';
 import { entitiesApi, type EntityRecord } from '../services/entities.api';
-import type { EntityDefinition, FieldDefinition } from '../types/entity.types';
+import type { EntityDefinition } from '../types/entity.types';
 import { HiPlus } from 'react-icons/hi';
 import DataTable from './DataTable';
+import EntityRecordForm from './EntityRecordForm';
 
 const EntityContentPage: React.FC = () => {
 
@@ -17,7 +18,6 @@ const EntityContentPage: React.FC = () => {
     const [showModal, setShowModal] = useState(false);
     const [editingRecord, setEditingRecord] = useState<EntityRecord | null>(null);
     const [formData, setFormData] = useState<Record<string, any>>({});
-    const [submitting, setSubmitting] = useState(false);
 
     // Fetch entity schema and data
     useEffect(() => {
@@ -32,8 +32,6 @@ const EntityContentPage: React.FC = () => {
                     entitiesApi.getAll(entityName)
                 ]);
 
-                console.log('Fetched entity schema:', schema);
-                console.log('Fetched entity data:', data);
                 setEntitySchema(schema);
                 setEntityData(data.data.map((item: any) => item.data));
             } catch (err: any) {
@@ -75,105 +73,24 @@ const EntityContentPage: React.FC = () => {
 
 
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleSubmit = async (submittedFormData: Record<string, any>) => {
         if (!entityName) return;
 
-        setSubmitting(true);
         try {
             if (editingRecord) {
-                const updated = await entitiesApi.update(entityName, editingRecord.id, formData);
+                const updated = await entitiesApi.update(entityName, editingRecord.id, submittedFormData);
                 setEntityData(prev => prev.map(item => item.id === editingRecord.id ? updated : item));
             } else {
-                await entitiesApi.create(entityName, formData);
+                await entitiesApi.create(entityName, submittedFormData);
                 // Refresh data after creation
                 const data: any = await entitiesApi.getAll(entityName);
-                setEntityData(data.data);
+                setEntityData(data.data.map((item: any) => item.data));
             }
             setShowModal(false);
             setFormData({});
         } catch (err: any) {
             alert(err.response?.data?.message || 'Failed to save record');
-        } finally {
-            setSubmitting(false);
-        }
-    };
-
-    const handleInputChange = (fieldName: string, value: any) => {
-        setFormData(prev => ({ ...prev, [fieldName]: value }));
-    };
-
-    const renderFormField = (field: FieldDefinition) => {
-        const value = formData[field.name] ?? field.defaultValue ?? '';
-
-        switch (field.type) {
-            case 'boolean':
-                return (
-                    <div key={field.name} className="mb-4">
-                        <div className="flex items-center gap-2">
-                            <Checkbox
-                                id={field.name}
-                                checked={!!value}
-                                onChange={(e) => handleInputChange(field.name, e.target.checked)}
-                            />
-                            <Label htmlFor={field.name}>{field.name}</Label>
-                            {field.required && <span className="text-red-500">*</span>}
-                        </div>
-                    </div>
-                );
-
-            case 'number':
-                return (
-                    <div key={field.name} className="mb-4">
-                        <Label htmlFor={field.name}>
-                            {field.name} {field.required && <span className="text-red-500">*</span>}
-                        </Label>
-                        <TextInput
-                            id={field.name}
-                            type="number"
-                            value={value}
-                            onChange={(e) => handleInputChange(field.name, parseFloat(e.target.value))}
-                            required={field.required}
-                            min={field.min}
-                            max={field.max}
-                        />
-                    </div>
-                );
-
-            case 'date':
-                return (
-                    <div key={field.name} className="mb-4">
-                        <Label htmlFor={field.name}>
-                            {field.name} {field.required && <span className="text-red-500">*</span>}
-                        </Label>
-                        <TextInput
-                            id={field.name}
-                            type="date"
-                            value={value ? new Date(value).toISOString().split('T')[0] : ''}
-                            onChange={(e) => handleInputChange(field.name, e.target.value)}
-                            required={field.required}
-                        />
-                    </div>
-                );
-
-            default: // string, email, url
-                return (
-                    <div key={field.name} className="mb-4">
-                        <Label htmlFor={field.name}>
-                            {field.name} {field.required && <span className="text-red-500">*</span>}
-                        </Label>
-                        <TextInput
-                            id={field.name}
-                            type={field.type === 'email' ? 'email' : field.type === 'url' ? 'url' : 'text'}
-                            value={value}
-                            onChange={(e) => handleInputChange(field.name, e.target.value)}
-                            required={field.required}
-                            minLength={field.minLength}
-                            maxLength={field.maxLength}
-                            pattern={field.pattern}
-                        />
-                    </div>
-                );
+            throw err; // Re-throw to let form handle loading state
         }
     };
 
@@ -232,24 +149,14 @@ const EntityContentPage: React.FC = () => {
             </Card>
 
             {/* Create/Edit Modal */}
-            <Modal show={showModal} onClose={() => setShowModal(false)} position="center-right">
-                <div className="p-6">
-                    <h3 className="text-xl font-semibold mb-4">
-                        {editingRecord ? 'Edit Record' : 'Create New Record'}
-                    </h3>
-                    <form onSubmit={handleSubmit}>
-                        {entitySchema.fields.map(field => renderFormField(field))}
-                        <div className="flex justify-end gap-2 mt-6">
-                            <Button color="gray" onClick={() => setShowModal(false)}>
-                                Cancel
-                            </Button>
-                            <Button type="submit" disabled={submitting}>
-                                {submitting ? <Spinner size="sm" /> : editingRecord ? 'Update' : 'Create'}
-                            </Button>
-                        </div>
-                    </form>
-                </div>
-            </Modal>
+            <EntityRecordForm
+                show={showModal}
+                onClose={() => setShowModal(false)}
+                onSubmit={handleSubmit}
+                entitySchema={entitySchema}
+                editingRecord={editingRecord}
+                initialData={formData}
+            />
         </div>
     );
 };
