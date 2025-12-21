@@ -2,6 +2,7 @@ import {
   Controller,
   Get,
   Post,
+  Put,
   Delete,
   Body,
   Param,
@@ -11,6 +12,7 @@ import {
 } from '@nestjs/common';
 import { EntityDefinitionsService } from './entity-definitions.service';
 import { CreateEntityDefinitionDto } from './dto/create-entity-definition.dto';
+import { UpdateEntityDefinitionDto } from './dto/update-entity-definition.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
@@ -39,6 +41,15 @@ export class EntityDefinitionsController {
     @Param('name') name: string
   ) {
     return this.service.findOne(user.id, name);
+  }
+
+  @Put(':name')
+  async update(
+    @CurrentUser() user: any,
+    @Param('name') name: string,
+    @Body() dto: UpdateEntityDefinitionDto
+  ) {
+    return this.service.update(user.id, name, dto);
   }
 
   @Delete(':name')

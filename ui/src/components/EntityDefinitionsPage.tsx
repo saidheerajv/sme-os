@@ -1,16 +1,15 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, Button, Badge, Modal, Alert } from 'flowbite-react';
 import { HiPlus, HiPencil, HiTrash, HiCode } from 'react-icons/hi';
 import { entityDefinitionsApi } from '../services/entityDefinitions.api';
 import type { EntityDefinition, FieldDefinition } from '../types/entity.types';
 import { FieldType } from '../types/entity.types';
-import EntityDefinitionForm from './EntityDefinitionForm';
 
 const EntityDefinitionsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [entities, setEntities] = useState<EntityDefinition[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedEntity, setSelectedEntity] = useState<EntityDefinition | null>(null);
-  const [isFormOpen, setIsFormOpen] = useState(false);
   const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
   const [entityToDelete, setEntityToDelete] = useState<EntityDefinition | null>(null);
   const [snackbar, setSnackbar] = useState<{
@@ -37,13 +36,11 @@ const EntityDefinitionsPage: React.FC = () => {
   };
 
   const handleCreateEntity = () => {
-    setSelectedEntity(null);
-    setIsFormOpen(true);
+    navigate('/dashboard/entity-definitions/new');
   };
 
   const handleEditEntity = (entity: EntityDefinition) => {
-    setSelectedEntity(entity);
-    setIsFormOpen(true);
+    navigate('/dashboard/entity-definitions/edit/' + entity.name, { state: { entity } });
   };
 
   const handleDeleteEntity = (entity: EntityDefinition) => {
@@ -64,19 +61,6 @@ const EntityDefinitionsPage: React.FC = () => {
     } finally {
       setIsDeleteConfirmOpen(false);
       setEntityToDelete(null);
-    }
-  };
-
-  const handleFormSubmit = async (formData: { name: string; fields: FieldDefinition[] }) => {
-    try {
-      const newEntity = await entityDefinitionsApi.create(formData);
-      setEntities([newEntity, ...entities]);
-      setIsFormOpen(false);
-      showSnackbar('Entity definition created successfully', 'success');
-    } catch (error: any) {
-      console.error('Failed to create entity:', error);
-      const errorMessage = error.response?.data?.message || 'Failed to create entity definition';
-      showSnackbar(errorMessage, 'error');
     }
   };
 
@@ -186,20 +170,6 @@ const EntityDefinitionsPage: React.FC = () => {
           ))}
         </div>
       )}
-
-      {/* Entity Form Modal */}
-      <Modal show={isFormOpen} onClose={() => setIsFormOpen(false)} size="xl">
-        <div className="p-4">
-          <h3 className="text-lg font-semibold mb-4">
-            {selectedEntity ? 'Edit Entity Definition' : 'Create Entity Definition'}
-          </h3>
-          <EntityDefinitionForm
-            initialData={selectedEntity}
-            onSubmit={handleFormSubmit}
-            onCancel={() => setIsFormOpen(false)}
-          />
-        </div>
-      </Modal>
 
       {/* Delete Confirmation Modal */}
       <Modal show={isDeleteConfirmOpen} onClose={() => setIsDeleteConfirmOpen(false)}>

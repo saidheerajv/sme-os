@@ -9,11 +9,27 @@ export const FieldType = {
 
 export type FieldType = typeof FieldType[keyof typeof FieldType];
 
+export interface DataTableConfig {
+
+}
+
+
+export interface SearchFieldConfig {
+
+  fieldName:string,
+  operator:string
+
+}
 export interface FieldDefinition {
   name: string;
   type: FieldType;
   required: boolean;
   unique?: boolean;
+  displayName?: string;
+  showInDataTable?: boolean;
+  showInForm?: boolean;
+  allowUpdate?: boolean;
+  autoGenerate?: boolean;
   
   // String constraints
   minLength?: number;
@@ -35,6 +51,7 @@ export interface EntityDefinition {
   tableName: string;
   userId: string;
   fields: FieldDefinition[];
+  searchFields?: SearchFieldConfig[];
   createdAt: string;
   updatedAt: string;
 }

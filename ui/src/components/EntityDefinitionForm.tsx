@@ -138,6 +138,10 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
 
         // Add optional properties only if they have values
         if (field.unique) cleanField.unique = field.unique;
+        if (field.displayName?.trim()) cleanField.displayName = field.displayName.trim();
+        if (field.showInDataTable !== undefined) cleanField.showInDataTable = field.showInDataTable;
+        if (field.showInForm !== undefined) cleanField.showInForm = field.showInForm;
+        if (field.allowUpdate !== undefined) cleanField.allowUpdate = field.allowUpdate;
         if (field.minLength !== undefined && field.minLength > 0) cleanField.minLength = field.minLength;
         if (field.maxLength !== undefined && field.maxLength > 0) cleanField.maxLength = field.maxLength;
         if (field.pattern?.trim()) cleanField.pattern = field.pattern.trim();
@@ -262,16 +266,28 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
         <Card key={field.id} className="mb-3 p-4">
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap gap-3 items-start">
-              <TextInput
-                type="text"
-                value={field.name}
-                onChange={(e) => updateField(field.id, { name: e.target.value })}
-                color={errors[`field-${field.id}-name`] ? 'failure' : 'gray'}
-                placeholder="title"
-                required
-                className="min-w-[200px] flex-1 mb-1"
-              />
-              <div className={`text-xs ${errors[`field-${field.id}-name`] ? 'text-red-600' : 'text-gray-500'}`}>{errors[`field-${field.id}-name`] || ''}</div>
+              <div className="flex flex-col flex-1 min-w-[200px]">
+                <TextInput
+                  type="text"
+                  value={field.name}
+                  onChange={(e) => updateField(field.id, { name: e.target.value })}
+                  color={errors[`field-${field.id}-name`] ? 'failure' : 'gray'}
+                  placeholder="title"
+                  required
+                  className="mb-1"
+                />
+                <div className={`text-xs ${errors[`field-${field.id}-name`] ? 'text-red-600' : 'text-gray-500'}`}>{errors[`field-${field.id}-name`] || 'Field name (camelCase)'}</div>
+              </div>
+              <div className="flex flex-col flex-1 min-w-[200px]">
+                <TextInput
+                  type="text"
+                  value={field.displayName || ''}
+                  onChange={(e) => updateField(field.id, { displayName: e.target.value })}
+                  placeholder="Title"
+                  className="mb-1"
+                />
+                <div className="text-xs text-gray-500">Display label (optional)</div>
+              </div>
               <Select
                 value={field.type}
                 onChange={(e) => updateField(field.id, { type: e.target.value as FieldType })}
@@ -308,6 +324,46 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
                 </Button>
               </div>
             </div>
+            
+            {/* Data Table Configuration */}
+            <div className="mt-3 p-3 bg-blue-50 rounded">
+              <div className="text-sm font-semibold mb-2">Data Table Configuration</div>
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  checked={field.showInDataTable ?? true}
+                  onChange={(e) => updateField(field.id, { showInDataTable: e.target.checked })}
+                  id={`showInDataTable-${field.id}`}
+                />
+                <label htmlFor={`showInDataTable-${field.id}`}>Show in Data Table</label>
+              </div>
+            </div>
+
+            {/* Form Configuration */}
+            <div className="mt-3 p-3 bg-green-50 rounded">
+              <div className="text-sm font-semibold mb-2">Form Configuration</div>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={field.showInForm ?? true}
+                    onChange={(e) => updateField(field.id, { showInForm: e.target.checked })}
+                    id={`showInForm-${field.id}`}
+                  />
+                  <label htmlFor={`showInForm-${field.id}`}>Show in Form</label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={field.allowUpdate ?? true}
+                    onChange={(e) => updateField(field.id, { allowUpdate: e.target.checked })}
+                    id={`allowUpdate-${field.id}`}
+                  />
+                  <label htmlFor={`allowUpdate-${field.id}`}>Allow Update</label>
+                </div>
+              </div>
+            </div>
+
             {renderFieldConstraints(field)}
           </div>
         </Card>

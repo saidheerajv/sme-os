@@ -41,7 +41,18 @@ const EntityRecordForm: React.FC<EntityRecordFormProps> = ({
     };
 
     const renderFormField = (field: FieldDefinition) => {
+        // Skip fields not marked for form display
+        if (field.showInForm === false) {
+            return null;
+        }
+
+        // Skip fields that don't allow updates when in edit mode
+        if (editingRecord && field.allowUpdate === false) {
+            return null;
+        }
+
         const value = formData[field.name] ?? field.defaultValue ?? '';
+        const fieldLabel = field.displayName || field.name;
 
         switch (field.type) {
             case 'boolean':
@@ -53,7 +64,7 @@ const EntityRecordForm: React.FC<EntityRecordFormProps> = ({
                                 checked={!!value}
                                 onChange={(e) => handleInputChange(field.name, e.target.checked)}
                             />
-                            <Label htmlFor={field.name}>{field.name}</Label>
+                            <Label htmlFor={field.name}>{fieldLabel}</Label>
                             {field.required && <span className="text-red-500">*</span>}
                         </div>
                     </div>
@@ -63,7 +74,7 @@ const EntityRecordForm: React.FC<EntityRecordFormProps> = ({
                 return (
                     <div key={field.name} className="mb-4">
                         <Label htmlFor={field.name}>
-                            {field.name} {field.required && <span className="text-red-500">*</span>}
+                            {fieldLabel} {field.required && <span className="text-red-500">*</span>}
                         </Label>
                         <TextInput
                             id={field.name}
@@ -81,7 +92,7 @@ const EntityRecordForm: React.FC<EntityRecordFormProps> = ({
                 return (
                     <div key={field.name} className="mb-4">
                         <Label htmlFor={field.name}>
-                            {field.name} {field.required && <span className="text-red-500">*</span>}
+                            {fieldLabel} {field.required && <span className="text-red-500">*</span>}
                         </Label>
                         <TextInput
                             id={field.name}
@@ -97,7 +108,7 @@ const EntityRecordForm: React.FC<EntityRecordFormProps> = ({
                 return (
                     <div key={field.name} className="mb-4">
                         <Label htmlFor={field.name}>
-                            {field.name} {field.required && <span className="text-red-500">*</span>}
+                            {fieldLabel} {field.required && <span className="text-red-500">*</span>}
                         </Label>
                         <TextInput
                             id={field.name}

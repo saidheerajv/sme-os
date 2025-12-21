@@ -21,14 +21,14 @@ interface DataTableProps {
 }
 
 const DataTable: React.FC<DataTableProps> = ({ data, schema, onEdit, onDelete }) => {
-  // Create columns from schema
-
-  console.log('Schema in DataTable:', schema, data);
 
   const columns = useMemo<ColumnDef<EntityRecord>[]>(() => {
-    const schemaColumns: ColumnDef<EntityRecord>[] = schema.fields.map((field: FieldDefinition) => ({
+    // Filter fields to only show those marked for display in data table
+    const fieldsToDisplay = schema.fields.filter(field => field.showInDataTable !== false);
+    
+    const schemaColumns: ColumnDef<EntityRecord>[] = fieldsToDisplay.map((field: FieldDefinition) => ({
       accessorKey: field.name,
-      header: field.name.charAt(0).toUpperCase() + field.name.slice(1),
+      header: field.displayName || field.name.charAt(0).toUpperCase() + field.name.slice(1),
       cell: (info) => {
         const value = info.getValue();
         

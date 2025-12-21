@@ -2,6 +2,7 @@ import { Injectable, ConflictException, NotFoundException } from '@nestjs/common
 import { PrismaService } from '../prisma/prisma.service';
 import { ValidationService } from '../validation/validation.service';
 import { CreateEntityDefinitionDto } from './dto/create-entity-definition.dto';
+import { UpdateEntityDefinitionDto } from './dto/update-entity-definition.dto';
 import { EntityDefinition } from '@prisma/client';
 
 @Injectable()
@@ -58,6 +59,27 @@ export class EntityDefinitionsService {
     }
 
     return entity;
+  }
+
+  async update(userId: string, name: string, dto: UpdateEntityDefinitionDto): Promise<EntityDefinition> {
+    // Verify entity exists and user owns it
+    const entity = await this.findOne(userId, name);
+
+    // Update entity definition
+    const updatedEntity = await this.prisma.entityDefinition.update({
+      where: { id: entity.id },
+      data: {
+        fields: dto.fields as any,
+      },
+    });
+
+    // Regenerate and cache validation schema
+    if (dto.fields) {
+      const schema = this.validationService.generateSchema(dto.fields);
+      this.validationService.cacheSchema(name, schema);
+    }
+
+    return updatedEntity;
   }
 
   async delete(userId: string, name: string): Promise<void> {

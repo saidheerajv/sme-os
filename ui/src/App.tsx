@@ -1,10 +1,12 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
+import LandingPage from './components/LandingPage';
 import AuthPage from './components/AuthPage';
 import DashboardLayout from './components/DashboardLayout';
 import DashboardHome from './components/DashboardHome';
 import EntityDefinitionsPage from './components/EntityDefinitionsPage';
+import EntityDefinitionFormPage from './components/EntityDefinitionFormPage';
 import EntityContentPage from './components/EntityContentPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingScreen from './components/LoadingScreen';
@@ -23,8 +25,9 @@ const AppContent: React.FC = () => {
     <Routes>
       <Route
         path="/"
-        element={user ? <Navigate to="/dashboard" replace /> : <AuthPage />}
+        element={user ? <Navigate to="/dashboard" replace /> : <LandingPage />}
       />
+      <Route path="/auth" element={user ? <Navigate to="/dashboard" replace /> : <AuthPage />} />
       <Route
         path="/dashboard"
         element={
@@ -35,6 +38,8 @@ const AppContent: React.FC = () => {
       >
         <Route index element={<Navigate to="entity-definitions" replace />} />
         <Route path="entity-definitions" element={<EntityDefinitionsPage />} />
+        <Route path="entity-definitions/new" element={<EntityDefinitionFormPage />} />
+        <Route path="entity-definitions/edit/:entityName" element={<EntityDefinitionFormPage />} />
         <Route path="content/:entityName" element={<EntityContentPage />} />
         <Route path="overview" element={<DashboardHome />} />
       </Route>

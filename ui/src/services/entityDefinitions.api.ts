@@ -22,6 +22,12 @@ export const entityDefinitionsApi = {
     return response.data;
   },
 
+  // Update entity definition
+  async update(name: string, data: CreateEntityDefinitionDto): Promise<EntityDefinition> {
+    const response = await axios.put(`${API_BASE_URL}/entity-definitions/${name}`, data);
+    return response.data;
+  },
+
   // Delete entity definition
   async delete(name: string): Promise<void> {
     await axios.delete(`${API_BASE_URL}/entity-definitions/${name}`);

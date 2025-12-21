@@ -44,9 +44,6 @@ const EntityContentPage: React.FC = () => {
         fetchData();
     }, [entityName]);
 
-
-
-
     // Handle create/edit modal
     const handleCreate = () => {
         setEditingRecord(null);
@@ -61,6 +58,7 @@ const EntityContentPage: React.FC = () => {
     };
 
     const handleDelete = async (record: EntityRecord) => {
+        
         if (!entityName || !confirm('Are you sure you want to delete this record?')) return;
         
         try {
