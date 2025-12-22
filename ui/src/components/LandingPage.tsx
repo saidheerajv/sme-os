@@ -1,5 +1,5 @@
 import React from 'react';
-import { Card } from 'flowbite-react';
+import { Card, Button } from 'flowbite-react';
 import AuthCard from './AuthCard';
 import { 
   HiCode, 
@@ -70,18 +70,20 @@ const LandingPage: React.FC = () => {
               <h1 className="text-3xl font-bold text-blue-600">BRM</h1>
             </div>
             <nav className="flex space-x-8">
-              <button
+              <Button
+                color="light"
                 onClick={() => scrollToSection('about')}
-                className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+                className="text-gray-700 hover:text-blue-600 font-medium"
               >
                 About
-              </button>
-              <button
+              </Button>
+              <Button
+                color="light"
                 onClick={() => scrollToSection('features')}
-                className="text-gray-700 hover:text-blue-600 font-medium transition-colors"
+                className="text-gray-700 hover:text-blue-600 font-medium"
               >
                 Features
-              </button>
+              </Button>
             </nav>
           </div>
         </div>
@@ -100,18 +102,21 @@ const LandingPage: React.FC = () => {
                 Build powerful internal tools without code. Empower your team with custom solutions tailored to your unique business needs.
               </p>
               <div className="flex gap-4">
-                <button
+                <Button
+                  color="info"
+                  size="lg"
                   onClick={() => scrollToSection('features')}
-                  className="px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
                 >
                   Learn More
-                </button>
-                <button
+                </Button>
+                <Button
+                  color="light"
+                  size="lg"
                   onClick={() => scrollToSection('contact')}
-                  className="px-8 py-3 border-2 border-blue-600 text-blue-600 font-semibold rounded-lg hover:bg-blue-50 transition-colors"
+                  className="border-2 border-blue-600 text-blue-600"
                 >
                   Contact Us
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -247,12 +252,14 @@ const LandingPage: React.FC = () => {
                 ></textarea>
               </div>
 
-              <button
+              <Button
                 type="submit"
-                className="w-full px-8 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                color="info"
+                size="lg"
+                className="w-full"
               >
                 Send Message
-              </button>
+              </Button>
             </form>
           </Card>
         </div>

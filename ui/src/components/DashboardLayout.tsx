@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navbar } from 'flowbite-react';
+import { Navbar, Button } from 'flowbite-react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaTachometerAlt, FaUser, FaSignOutAlt, FaDatabase, FaHome, FaBars } from 'react-icons/fa';
 import type { EntityDefinition } from '../types/entity.types';
@@ -41,12 +41,14 @@ const DashboardLayout: React.FC = () => {
             {/* Top Navigation */}
             <Navbar fluid rounded className="bg-teal-600 text-white rounded-0 z-30 border-b border-teal-700">
                 <div className="flex items-center">
-                    <button
-                        className="mr-3 md:hidden p-2 hover:bg-teal-700 rounded"
+                    <Button
+                        color="light"
+                        size="sm"
+                        className="mr-3 md:hidden p-2 hover:bg-teal-700 rounded bg-transparent border-0"
                         onClick={() => setIsSidebarOpen(!isSidebarOpen)}
                     >
                         <FaBars />
-                    </button>
+                    </Button>
                     <Link to="/dashboard" className="flex items-center">
                         <FaTachometerAlt className="mr-3 text-xl" />
                         <span className="self-center whitespace-nowrap text-xl font-semibold">CMS Dashboard</span>
@@ -57,9 +59,9 @@ const DashboardLayout: React.FC = () => {
                         <FaUser />
                         <span className="text-sm hidden sm:inline">{user?.name}</span>
                     </div>
-                    <button onClick={handleLogout} className="flex items-center gap-2 hover:text-gray-200 bg-transparent border-0 cursor-pointer">
+                    <Button color="light" onClick={handleLogout} className="flex items-center gap-2 hover:text-gray-200 bg-transparent border-0 text-white">
                         <FaSignOutAlt /> <span className="hidden sm:inline">Logout</span>
-                    </button>
+                    </Button>
                 </div>
             </Navbar>
 

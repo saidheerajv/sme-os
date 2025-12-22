@@ -37,20 +37,22 @@ const AuthCard: React.FC = () => {
   return (
     <Card className="w-full max-w-md p-6">
       <div className="flex mb-4 border-b">
-        <button
-          className={`flex-1 py-2 text-center font-semibold ${tab === 'login' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}
+        <Button
+          color="light"
+          className={`flex-1 py-2 text-center font-semibold rounded-none ${tab === 'login' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}
           onClick={() => handleTabChange('login')}
           type="button"
         >
           Login
-        </button>
-        <button
-          className={`flex-1 py-2 text-center font-semibold ${tab === 'signup' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}
+        </Button>
+        <Button
+          color="light"
+          className={`flex-1 py-2 text-center font-semibold rounded-none ${tab === 'signup' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}
           onClick={() => handleTabChange('signup')}
           type="button"
         >
           Sign Up
-        </button>
+        </Button>
       </div>
 
       {error && (

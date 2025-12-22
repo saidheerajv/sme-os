@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
+import { ThemeProvider } from 'flowbite-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LandingPage from './components/LandingPage';
 import AuthPage from './components/AuthPage';
@@ -11,6 +12,7 @@ import EntityContentPage from './components/EntityContentPage';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingScreen from './components/LoadingScreen';
 import ErrorBoundary from './components/ErrorBoundary';
+import { customTheme } from './theme/flowbite-theme';
 import './App.css';
 
 const AppContent: React.FC = () => {
@@ -50,13 +52,15 @@ const AppContent: React.FC = () => {
 
 function App() {
   return (
-    <ErrorBoundary>
-      <AuthProvider>
-        <Router>
-          <AppContent />
-        </Router>
-      </AuthProvider>
-    </ErrorBoundary>
+    <ThemeProvider theme={customTheme}>
+      <ErrorBoundary>
+        <AuthProvider>
+          <Router>
+            <AppContent />
+          </Router>
+        </AuthProvider>
+      </ErrorBoundary>
+    </ThemeProvider>
   );
 }
 
