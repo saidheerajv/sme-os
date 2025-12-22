@@ -40,4 +40,13 @@ export class FieldDefinitionDto {
   // Default value
   @IsOptional()
   defaultValue?: any;
+
+  // Display configuration
+  @IsOptional()
+  @IsBoolean()
+  displayInDataTable?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  enableSearch?: boolean;
 }

@@ -43,6 +43,7 @@ export interface FieldDefinition {
   // Default value
   defaultValue?: any;
   displayInDataTable?: boolean;
+  enableSearch?: boolean;
 }
 
 export interface EntityDefinition {

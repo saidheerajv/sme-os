@@ -9,8 +9,11 @@ export interface EntityRecord {
 
 export const entitiesApi = {
   // Get all records for an entity type
-  async getAll(entityType: string): Promise<EntityRecord[]> {
-    const response = await axios.get(`${API_BASE_URL}/entities/${entityType}`);
+  async getAll(entityType: string, searchQuery?: string): Promise<EntityRecord[]> {
+    const url = searchQuery 
+      ? `${API_BASE_URL}/entities/${entityType}?search=${encodeURIComponent(searchQuery)}`
+      : `${API_BASE_URL}/entities/${entityType}`;
+    const response = await axios.get(url);
     return response.data;
   },
 

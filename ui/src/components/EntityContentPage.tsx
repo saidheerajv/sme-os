@@ -7,6 +7,7 @@ import type { EntityDefinition } from '../types/entity.types';
 import { HiPlus } from 'react-icons/hi';
 import DataTable from './DataTable';
 import EntityRecordForm from './EntityRecordForm';
+import SearchModule from './SearchModule';
 
 const EntityContentPage: React.FC = () => {
 
@@ -18,6 +19,7 @@ const EntityContentPage: React.FC = () => {
     const [showModal, setShowModal] = useState(false);
     const [editingRecord, setEditingRecord] = useState<EntityRecord | null>(null);
     const [formData, setFormData] = useState<Record<string, any>>({});
+    const [searchQuery, setSearchQuery] = useState<string>('');
 
     // Fetch entity schema and data
     useEffect(() => {
@@ -29,7 +31,7 @@ const EntityContentPage: React.FC = () => {
             try {
                 const [schema, data]:any = await Promise.all([
                     entityDefinitionsApi.getByName(entityName),
-                    entitiesApi.getAll(entityName)
+                    entitiesApi.getAll(entityName, searchQuery)
                 ]);
 
                 setEntitySchema(schema);
@@ -42,7 +44,7 @@ const EntityContentPage: React.FC = () => {
         };
 
         fetchData();
-    }, [entityName]);
+    }, [entityName, searchQuery]);
 
     // Handle create/edit modal
     const handleCreate = () => {
@@ -81,7 +83,7 @@ const EntityContentPage: React.FC = () => {
             } else {
                 await entitiesApi.create(entityName, submittedFormData);
                 // Refresh data after creation
-                const data: any = await entitiesApi.getAll(entityName);
+                const data: any = await entitiesApi.getAll(entityName, searchQuery);
                 setEntityData(data.data.map((item: any) => item.data));
             }
             setShowModal(false);
@@ -120,6 +122,14 @@ const EntityContentPage: React.FC = () => {
         );
     }
 
+    // Get searchable fields
+    const searchableFields = entitySchema.fields.filter(field => field.enableSearch === true);
+
+    // Handle search
+    const handleSearch = (query: string) => {
+        setSearchQuery(query);
+    };
+
     return (
         <div className="max-w-7xl mx-auto mt-8 mb-8 px-4">
             <div className="flex justify-between items-center mb-6">
@@ -129,6 +139,14 @@ const EntityContentPage: React.FC = () => {
                     Add New
                 </Button>
             </div>
+
+            {/* Search Module */}
+            {searchableFields.length > 0 && (
+                <SearchModule 
+                    fields={searchableFields}
+                    onSearch={handleSearch}
+                />
+            )}
 
             <Card>
                 {entityData.length === 0 ? (

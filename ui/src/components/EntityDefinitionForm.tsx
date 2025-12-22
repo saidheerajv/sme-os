@@ -142,6 +142,7 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
         if (field.showInDataTable !== undefined) cleanField.showInDataTable = field.showInDataTable;
         if (field.showInForm !== undefined) cleanField.showInForm = field.showInForm;
         if (field.allowUpdate !== undefined) cleanField.allowUpdate = field.allowUpdate;
+        if (field.enableSearch !== undefined) cleanField.enableSearch = field.enableSearch;
         if (field.minLength !== undefined && field.minLength > 0) cleanField.minLength = field.minLength;
         if (field.maxLength !== undefined && field.maxLength > 0) cleanField.maxLength = field.maxLength;
         if (field.pattern?.trim()) cleanField.pattern = field.pattern.trim();
@@ -328,14 +329,25 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
             {/* Data Table Configuration */}
             <div className="mt-3 p-3 bg-blue-50 rounded">
               <div className="text-sm font-semibold mb-2">Data Table Configuration</div>
-              <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
-                  checked={field.showInDataTable ?? true}
-                  onChange={(e) => updateField(field.id, { showInDataTable: e.target.checked })}
-                  id={`showInDataTable-${field.id}`}
-                />
-                <label htmlFor={`showInDataTable-${field.id}`}>Show in Data Table</label>
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={field.showInDataTable ?? true}
+                    onChange={(e) => updateField(field.id, { showInDataTable: e.target.checked })}
+                    id={`showInDataTable-${field.id}`}
+                  />
+                  <label htmlFor={`showInDataTable-${field.id}`}>Show in Data Table</label>
+                </div>
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={field.enableSearch ?? false}
+                    onChange={(e) => updateField(field.id, { enableSearch: e.target.checked })}
+                    id={`enableSearch-${field.id}`}
+                  />
+                  <label htmlFor={`enableSearch-${field.id}`}>Enable Search</label>
+                </div>
               </div>
             </div>
 
