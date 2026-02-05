@@ -14,6 +14,6 @@ async function bootstrap() {
   app.useGlobalFilters(new ZodExceptionFilter());
   
   await app.listen(3000);
-  console.log('🚀 Server running on http://localhost:3000');
+  console.log('🚀 Backend Server running on http://localhost:3000');
 }
 bootstrap();

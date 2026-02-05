@@ -28,12 +28,24 @@ export class AuthService {
     const saltRounds = 10;
     const hashedPassword = await bcrypt.hash(password, saltRounds);
 
-    // Create user
+    // Create user with default organization
     const user = await this.prisma.user.create({
       data: {
         email,
         password: hashedPassword,
         name,
+        organizationMembers: {
+          create: {
+            role: 'owner',
+            organization: {
+              create: {
+                name: `${name}'s Organization`,
+                slug: `${email.split('@')[0]}-org-${Date.now()}`,
+                description: 'Default organization',
+              },
+            },
+          },
+        },
       },
       select: {
         id: true,
@@ -41,6 +53,11 @@ export class AuthService {
         name: true,
         createdAt: true,
         updatedAt: true,
+        organizationMembers: {
+          include: {
+            organization: true,
+          },
+        },
       },
     });
 
@@ -49,7 +66,14 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload);
 
     return {
-      user,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+      },
+      defaultOrganization: user.organizationMembers[0]?.organization,
       accessToken,
     };
   }

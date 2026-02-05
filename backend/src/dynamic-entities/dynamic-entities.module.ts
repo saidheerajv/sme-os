@@ -5,9 +5,10 @@ import { FilterService } from './filters/filter.service';
 import { QueryService } from './services/query.service';
 import { ValidationModule } from '../validation/validation.module';
 import { EntityDefinitionsModule } from '../entity-definitions/entity-definitions.module';
+import { OrganizationsModule } from '../organizations/organizations.module';
 
 @Module({
-  imports: [ValidationModule, EntityDefinitionsModule],
+  imports: [ValidationModule, EntityDefinitionsModule, OrganizationsModule],
   providers: [DynamicEntitiesService, FilterService, QueryService],
   controllers: [DynamicEntitiesController]
 })

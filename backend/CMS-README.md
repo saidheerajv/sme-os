@@ -1,6 +1,32 @@
 # Building Dynamic Entity System with NestJS & Prisma
 
-Complete guide to create runtime entities with automatic CRUD APIs and validation.
+Complete guide to create runtime entities with automatic CRUD APIs, validation, and multi-tenant organization architecture.
+
+## Architecture Overview
+
+This system uses a **multi-tenant organization-based architecture** where:
+- Users can create and join multiple organizations
+- Each organization has its own entities and data (complete isolation)
+- Users have roles within organizations (owner, admin, member)
+- Entity definitions and data are scoped to organizations, not individual users
+
+### Key Concepts
+
+**Organization**: A workspace that groups users and their entities together
+- Has multiple members with different roles
+- Owns entity definitions and all entity data
+- Provides data isolation between different organizations
+
+**User**: Individual account that can belong to multiple organizations
+- Can have different roles in different organizations
+- Access is controlled through organization membership
+
+**Roles**:
+- `owner`: Full control, can manage members and organization settings
+- `admin`: Can manage entities and data, invite members
+- `member`: Can create and manage entity data
+
+**Organization Context**: All entity operations require specifying which organization to operate on via the `x-organization-id` header.
 
 ## Phase 1: Project Setup
 
@@ -46,32 +72,80 @@ datasource db {
 model User {
   id        String   @id @default(uuid())
   email     String   @unique
+  password  String
   name      String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   
-  entityDefinitions EntityDefinition[]
-  dynamicEntities   DynamicEntity[]
+  organizationMembers OrganizationMember[]
 }
 
-model EntityDefinition {
+model Organization {
   id          String   @id @default(uuid())
-  name        String   @unique // e.g., "Product", "Customer"
-  tableName   String   @unique // e.g., "product", "customer"
-  userId      String
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  fields      Json     // Field definitions
+  name        String
+  slug        String   @unique // URL-friendly identifier
+  description String?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   
+  members           OrganizationMember[]
+  entityDefinitions EntityDefinition[]
+  dynamicEntities   DynamicEntity[]
+  
+  @@index([slug])
+}
+
+model OrganizationMember {
+  id             String   @id @default(uuid())
+  userId         String
+  organizationId String
+  role           String   // 'owner', 'admin', 'member'
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  
+  @@unique([userId, organizationId])
   @@index([userId])
+  @@index([organizationId])
+}
+
+model EntityDefinition {
+  id             String   @id @default(uuid())
+  name           String   // e.g., "Product", "Customer"
+  tableName      String   // e.g., "product", "customer"
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  fields         Json     // Field definitions
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@unique([name, organizationId])
+  @@index([organizationId])
 }
 
 model DynamicEntity {
-  id         String   @id @default(uuid())
-  entityType String   // References EntityDefinition.name
-  userId     String
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             String   @id @default(uuid())
+  entityType     String   // References EntityDefinition.name
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  data           Json     // Actual entity data
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  
+  @@index([entityType, organizationId])
+  @@index([organizationId])
+}
+```
+
+**Key Changes from User-Based to Organization-Based:**
+- Added `Organization` model as the main tenant
+- Added `OrganizationMember` as a join table for many-to-many relationship between users and organizations
+- `EntityDefinition` now references `organizationId` instead of `userId`
+- `DynamicEntity` now references `organizationId` instead of `userId`
+- Entity names are unique per organization (not globally)
+- All data is scoped to organizations for complete multi-tenancy
   data       Json     // Actual entity data
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
@@ -275,6 +349,10 @@ export class ValidationService {
     return schema.parse(data);
   }
 
+  validatePartialData(schema: ZodSchema, data: unknown): any {
+    return schema.partial().parse(data);
+  }
+
   clearCache(entityType?: string): void {
     if (entityType) {
       this.schemaCache.delete(entityType);
@@ -285,7 +363,71 @@ export class ValidationService {
 }
 ```
 
-## Phase 4: Entity Definition Module
+## Phase 4: Organization Module
+
+The organization module provides multi-tenant capabilities, allowing users to create and manage organizations where entities are scoped.
+
+### Step 8a: Create Organization Module
+
+```bash
+nest g module organizations
+nest g service organizations
+nest g controller organizations
+```
+
+### Step 8b: Create Organization Service
+
+Create `src/organizations/organizations.service.ts` - This service handles:
+- Creating organizations (user becomes owner)
+- Managing organization members
+- Checking user permissions within organizations
+- Organization CRUD operations
+
+Key methods:
+- `create()`: Create organization with user as owner
+- `findAllForUser()`: Get all organizations for a user
+- `inviteMember()`: Add users to organization
+- `checkUserRole()`: Verify user permissions
+- `getUserRole()`: Get user's role in organization
+
+### Step 8c: Create DTOs
+
+**CreateOrganizationDto**: Validates organization creation
+```typescript
+- name: string (3-100 chars)
+- slug: string (unique, URL-friendly, 3-50 chars)
+- description?: string (optional, max 500 chars)
+```
+
+**InviteMemberDto**: Validates member invitations
+```typescript
+- email: string (user email)
+- role: 'admin' | 'member'
+```
+
+### Step 8d: Create Organization Guard
+
+Create `src/organizations/guards/organization.guard.ts`:
+
+The OrganizationGuard:
+1. Checks if user is authenticated
+2. Extracts `x-organization-id` from request header
+3. Verifies user is a member of that organization
+4. Attaches organization context to request
+
+Usage: Apply to routes that need organization scope.
+
+### Step 8e: Create Organization Decorator
+
+Create `src/organizations/decorators/current-organization.decorator.ts`:
+
+```typescript
+@CurrentOrganization() org: { id: string, role: string }
+```
+
+Extracts organization context attached by OrganizationGuard.
+
+## Phase 5: Entity Definition Module
 
 ### Step 8: Create Entity Definition Module
 
@@ -438,7 +580,7 @@ export class EntityDefinitionsController {
 }
 ```
 
-## Phase 5: Dynamic Entity CRUD
+## Phase 5: Dynamic Entity CRUD with Query Features
 
 ### Step 9: Create Dynamic Entity Module
 
@@ -448,6 +590,161 @@ nest g service dynamic-entities
 nest g controller dynamic-entities
 ```
 
+### Step 9a: Create DTOs
+
+Create `src/dynamic-entities/dto/entity-query.dto.ts`:
+
+```typescript
+import { IsOptional, IsString, IsInt, Min, Max } from 'class-validator';
+import { Type } from 'class-transformer';
+
+export class EntityQueryDto {
+  @IsOptional()
+  @IsString()
+  search?: string; // Filter string: field:operatorValue;field2:operatorValue2
+
+  @IsOptional()
+  @IsString()
+  sort?: string; // Sort field and direction: field:asc or field:desc
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  page?: number = 1; // Page number for pagination
+
+  @IsOptional()
+  @Type(() => Number)
+  @IsInt()
+  @Min(1)
+  @Max(100)
+  limit?: number = 50; // Items per page
+
+  @IsOptional()
+  @IsString()
+  select?: string; // Comma-separated list of fields to return
+}
+```
+
+### Step 9b: Create Query Service
+
+Create `src/dynamic-entities/services/query.service.ts`:
+
+```typescript
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { FilterService } from '../filters/filter.service';
+import { EntityQueryDto } from '../dto/entity-query.dto';
+
+@Injectable()
+export class QueryService {
+  constructor(private readonly filterService: FilterService) {}
+
+  parseQuery(query: EntityQueryDto, fieldDefinitions: any[]) {
+    const options: any = {};
+
+    // Parse filters
+    if (query.search) {
+      const conditions = this.filterService.parseFilters(query.search);
+      this.filterService.validateFilters(conditions, fieldDefinitions);
+      options.filters = this.filterService.buildWhereClause(conditions, fieldDefinitions);
+    }
+
+    // Parse sorting
+    if (query.sort) {
+      const [field, direction] = query.sort.split(':');
+      if (!['asc', 'desc'].includes(direction?.toLowerCase())) {
+        throw new BadRequestException('Invalid sort direction. Use "asc" or "desc"');
+      }
+      options.sort = { field, direction: direction.toLowerCase() };
+    }
+
+    // Parse pagination
+    if (query.page || query.limit) {
+      const page = Math.max(1, query.page || 1);
+      const limit = Math.min(Math.max(1, query.limit || 50), 100);
+      options.pagination = {
+        page,
+        limit,
+        offset: (page - 1) * limit,
+      };
+    }
+
+    // Parse field selection
+    if (query.select) {
+      options.select = query.select.split(',').map(f => f.trim());
+    }
+
+    return options;
+  }
+
+  buildPrismaQuery(userId: string, entityType: string, options: any) {
+    const query: any = {
+      where: {
+        entityType,
+        userId,
+        ...options.filters,
+      },
+    };
+
+    // Add sorting
+    if (options.sort) {
+      query.orderBy = {
+        data: {
+          path: [options.sort.field],
+          sort: options.sort.direction,
+        },
+      };
+    } else {
+      query.orderBy = { createdAt: 'desc' };
+    }
+
+    // Add pagination
+    if (options.pagination) {
+      query.skip = options.pagination.offset;
+      query.take = options.pagination.limit;
+    }
+
+    return query;
+  }
+
+  buildPaginationMeta(total: number, pagination?: any) {
+    if (!pagination) {
+      return { total, hasMore: false };
+    }
+
+    const totalPages = Math.ceil(total / pagination.limit);
+    return {
+      total,
+      page: pagination.page,
+      limit: pagination.limit,
+      totalPages,
+      hasNextPage: pagination.page < totalPages,
+      hasPrevPage: pagination.page > 1,
+    };
+  }
+
+  filterSelectedFields(entities: any[], selectFields?: string[]) {
+    if (!selectFields?.length) return entities;
+
+    return entities.map(entity => ({
+      ...entity,
+      data: selectFields.reduce((acc, field) => {
+        if (entity.data?.hasOwnProperty(field)) {
+          acc[field] = entity.data[field];
+        }
+        return acc;
+      }, {}),
+    }));
+  }
+}
+```
+
+### Step 9c: Create Filter Service
+
+Create `src/dynamic-entities/filters/filter.service.ts` to handle filtering logic. See `FILTER_API_DOCS.md` for complete implementation details.
+
+### Step 9d: Update Service with Query Features
+
 Edit `src/dynamic-entities/dynamic-entities.service.ts`:
 
 ```typescript
@@ -455,7 +752,8 @@ import { Injectable, NotFoundException, BadRequestException } from '@nestjs/comm
 import { PrismaService } from '../prisma/prisma.service';
 import { ValidationService } from '../validation/validation.service';
 import { EntityDefinitionsService } from '../entity-definitions/entity-definitions.service';
-import { DynamicEntity } from '@prisma/client';
+import { QueryService } from './services/query.service';
+import { EntityQueryDto } from './dto/entity-query.dto';
 
 @Injectable()
 export class DynamicEntitiesService {
@@ -463,9 +761,10 @@ export class DynamicEntitiesService {
     private prisma: PrismaService,
     private validationService: ValidationService,
     private entityDefinitionsService: EntityDefinitionsService,
+    private queryService: QueryService,
   ) {}
 
-  async create(userId: string, entityType: string, data: unknown): Promise<DynamicEntity> {
+  async create(userId: string, entityType: string, data: unknown): Promise<any> {
     // Verify entity definition exists
     await this.entityDefinitionsService.findOne(userId, entityType);
 
@@ -488,17 +787,41 @@ export class DynamicEntitiesService {
     });
   }
 
-  async findAll(userId: string, entityType: string): Promise<DynamicEntity[]> {
-    // Verify entity definition exists
-    await this.entityDefinitionsService.findOne(userId, entityType);
+  async findAll(userId: string, entityType: string, query?: EntityQueryDto): Promise<any> {
+    // Verify entity definition exists and get field definitions
+    const entityDefinition = await this.entityDefinitionsService.findOne(userId, entityType);
+    const fieldDefinitions = entityDefinition.fields as any[];
 
-    return this.prisma.dynamicEntity.findMany({
-      where: { entityType, userId },
-      orderBy: { createdAt: 'desc' },
-    });
+    // Parse query options
+    const options = query ? this.queryService.parseQuery(query, fieldDefinitions) : {};
+
+    // Build Prisma query
+    const prismaQuery = this.queryService.buildPrismaQuery(userId, entityType, options);
+
+    // Execute query
+    const entities = await this.prisma.dynamicEntity.findMany(prismaQuery);
+
+    // Filter selected fields if specified
+    const filteredEntities = this.queryService.filterSelectedFields(entities, options.select);
+
+    // If pagination is requested, also get total count
+    if (options.pagination) {
+      const total = await this.prisma.dynamicEntity.count({
+        where: prismaQuery.where,
+      });
+      return {
+        data: filteredEntities,
+        meta: this.queryService.buildPaginationMeta(total, options.pagination),
+      };
+    }
+
+    return {
+      data: filteredEntities,
+      meta: this.queryService.buildPaginationMeta(filteredEntities.length),
+    };
   }
 
-  async findOne(userId: string, entityType: string, id: string): Promise<DynamicEntity> {
+  async findOne(userId: string, entityType: string, id: string): Promise<any> {
     const entity = await this.prisma.dynamicEntity.findFirst({
       where: { id, entityType, userId },
     });
@@ -510,7 +833,7 @@ export class DynamicEntitiesService {
     return entity;
   }
 
-  async update(userId: string, entityType: string, id: string, data: unknown): Promise<DynamicEntity> {
+  async update(userId: string, entityType: string, id: string, data: unknown): Promise<any> {
     // Verify entity exists
     await this.findOne(userId, entityType, id);
 
@@ -521,7 +844,7 @@ export class DynamicEntitiesService {
     }
 
     // Validate data (partial update)
-    const validatedData = this.validationService.validateData(schema.partial(), data);
+    const validatedData = this.validationService.validatePartialData(schema, data);
 
     // Update entity
     return this.prisma.dynamicEntity.update({
@@ -530,7 +853,7 @@ export class DynamicEntitiesService {
     });
   }
 
-  async delete(userId: string, entityType: string, id: string): Promise<void> {
+  async delete(userId: string, entityType: string, id: string): Promise<any> {
     // Verify entity exists
     await this.findOne(userId, entityType, id);
 
@@ -540,6 +863,8 @@ export class DynamicEntitiesService {
   }
 }
 ```
+
+### Step 9e: Update Controller with Query Parameters
 
 Edit `src/dynamic-entities/dynamic-entities.controller.ts`:
 
@@ -552,60 +877,90 @@ import {
   Delete,
   Body,
   Param,
+  Query,
   HttpCode,
   HttpStatus,
+  UseGuards,
 } from '@nestjs/common';
 import { DynamicEntitiesService } from './dynamic-entities.service';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { EntityQueryDto } from './dto/entity-query.dto';
 
 @Controller('entities/:entityType')
+@UseGuards(JwtAuthGuard)
 export class DynamicEntitiesController {
   constructor(private readonly service: DynamicEntitiesService) {}
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(
+    @CurrentUser() user: any,
     @Param('entityType') entityType: string,
     @Body() data: unknown,
   ) {
-    const userId = 'test-user-id';
-    return this.service.create(userId, entityType, data);
+    return this.service.create(user.id, entityType, data);
   }
 
   @Get()
-  async findAll(@Param('entityType') entityType: string) {
-    const userId = 'test-user-id';
-    return this.service.findAll(userId, entityType);
+  async findAll(
+    @CurrentUser() user: any,
+    @Param('entityType') entityType: string,
+    @Query() query: EntityQueryDto,
+  ) {
+    return this.service.findAll(user.id, entityType, query);
   }
 
   @Get(':id')
   async findOne(
+    @CurrentUser() user: any,
     @Param('entityType') entityType: string,
     @Param('id') id: string,
   ) {
-    const userId = 'test-user-id';
-    return this.service.findOne(userId, entityType, id);
+    return this.service.findOne(user.id, entityType, id);
   }
 
   @Put(':id')
   async update(
+    @CurrentUser() user: any,
     @Param('entityType') entityType: string,
     @Param('id') id: string,
     @Body() data: unknown,
   ) {
-    const userId = 'test-user-id';
-    return this.service.update(userId, entityType, id, data);
+    return this.service.update(user.id, entityType, id, data);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(
+    @CurrentUser() user: any,
     @Param('entityType') entityType: string,
     @Param('id') id: string,
   ) {
-    const userId = 'test-user-id';
-    await this.service.delete(userId, entityType, id);
+    await this.service.delete(user.id, entityType, id);
   }
 }
+```
+
+### Step 9f: Update Module
+
+Edit `src/dynamic-entities/dynamic-entities.module.ts`:
+
+```typescript
+import { Module } from '@nestjs/common';
+import { DynamicEntitiesController } from './dynamic-entities.controller';
+import { DynamicEntitiesService } from './dynamic-entities.service';
+import { EntityDefinitionsModule } from '../entity-definitions/entity-definitions.module';
+import { ValidationModule } from '../validation/validation.module';
+import { QueryService } from './services/query.service';
+import { FilterService } from './filters/filter.service';
+
+@Module({
+  imports: [EntityDefinitionsModule, ValidationModule],
+  controllers: [DynamicEntitiesController],
+  providers: [DynamicEntitiesService, QueryService, FilterService],
+})
+export class DynamicEntitiesModule {}
 ```
 
 ## Phase 6: Application Bootstrap
@@ -696,26 +1051,77 @@ bootstrap();
 
 ## Phase 7: Testing
 
-### Step 12: Create Test User
+### Important: Organization Context
 
-First, create a test user manually:
+**All entity and entity-definition requests require the `x-organization-id` header.**
 
-```bash
-npx prisma studio
+Format:
+```
+x-organization-id: <organization-uuid>
 ```
 
-Add a user with:
-- id: `test-user-id`
-- email: `test@example.com`
-- name: `Test User`
+After signup/login, you'll receive an organization ID. Use it in all subsequent requests to specify which organization's data you want to access.
 
-### Step 13: Test API Endpoints
+### Step 12: Test API Endpoints
 
-**1. Create Entity Definition:**
+**1. Register a User:**
+
+When you register, a default organization is automatically created for you.
+
+```bash
+curl -X POST http://localhost:3000/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "SecurePass123!",
+    "name": "Test User"
+  }'
+```
+
+Response includes:
+```json
+{
+  "user": {...},
+  "defaultOrganization": {
+    "id": "org-uuid-here",
+    "name": "Test User's Organization",
+    "slug": "test-org-..."
+  },
+  "accessToken": "jwt-token-here"
+}
+```
+
+**Save both the `accessToken` and `defaultOrganization.id` for subsequent requests.**
+
+**2. Login:**
+
+```bash
+curl -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "test@example.com",
+    "password": "SecurePass123!"
+  }'
+```
+
+Save the returned `access_token` for subsequent requests.
+
+**3. Get Your Organizations:**
+
+```bash
+curl http://localhost:3000/organizations \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
+
+**4. Create Entity Definition:**
+
+**Note: Now requires `x-organization-id` header!**
 
 ```bash
 curl -X POST http://localhost:3000/entity-definitions \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID" \
   -d '{
     "name": "Product",
     "fields": [
@@ -733,6 +1139,11 @@ curl -X POST http://localhost:3000/entity-definitions \
         "min": 0
       },
       {
+        "name": "category",
+        "type": "string",
+        "required": true
+      },
+      {
         "name": "description",
         "type": "string",
         "required": false
@@ -746,30 +1157,64 @@ curl -X POST http://localhost:3000/entity-definitions \
   }'
 ```
 
-**2. Get All Entity Definitions:**
+**5. Get All Entity Definitions:**
 
 ```bash
-curl http://localhost:3000/entity-definitions
+curl http://localhost:3000/entity-definitions \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID"
 ```
 
-**3. Create Dynamic Entity (Product):**
+**6. Create Dynamic Entities (Products):**
 
 ```bash
+# Product 1
 curl -X POST http://localhost:3000/entities/Product \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID" \
   -d '{
-    "title": "Laptop",
-    "price": 999.99,
+    "title": "MacBook Pro",
+    "price": 1299.99,
+    "category": "laptops",
     "description": "High-performance laptop",
     "inStock": true
   }'
+
+# Product 2
+curl -X POST http://localhost:3000/entities/Product \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID" \
+  -d '{
+    "title": "Dell Laptop",
+    "price": 799.99,
+    "category": "laptops",
+    "description": "Budget-friendly laptop",
+    "inStock": true
+  }'
+
+# Product 3
+curl -X POST http://localhost:3000/entities/Product \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID" \
+  -d '{
+    "title": "iPad Pro",
+    "price": 899.99,
+    "category": "tablets",
+    "description": "Professional tablet",
+    "inStock": false
+  }'
 ```
 
-**4. Test Validation (Should Fail):**
+**7. Test Validation (Should Fail):**
 
 ```bash
 curl -X POST http://localhost:3000/entities/Product \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID" \
   -d '{
     "title": "AB",
     "price": -5,
@@ -777,38 +1222,138 @@ curl -X POST http://localhost:3000/entities/Product \
   }'
 ```
 
-**5. Get All Products:**
+**8. Get All Products (Basic):**
 
 ```bash
-curl http://localhost:3000/entities/Product
+curl http://localhost:3000/entities/Product \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID"
 ```
 
-**6. Update Product:**
+**9. Test Filtering:**
+
+```bash
+# Products with "laptop" in title
+curl "http://localhost:3000/entities/Product?search=title:lklaptop" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID"
+
+# Products under $1000
+curl "http://localhost:3000/entities/Product?search=price:lt1000" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID"
+
+# In-stock products only
+curl "http://localhost:3000/entities/Product?search=inStock:true" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID"
+
+# Complex: In-stock laptops under $1000
+curl "http://localhost:3000/entities/Product?search=title:lklaptop;price:lt1000;inStock:true" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID"
+```
+
+**10. Test Pagination:**
+
+```bash
+# Get first 10 products
+curl "http://localhost:3000/entities/Product?page=1&limit=10" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID"
+
+# Get second page
+curl "http://localhost:3000/entities/Product?page=2&limit=10" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID"
+```
+
+**11. Test Sorting:**
+
+```bash
+# Sort by price ascending
+curl "http://localhost:3000/entities/Product?sort=price:asc" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID"
+
+# Sort by title descending
+curl "http://localhost:3000/entities/Product?sort=title:desc" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID"
+```
+
+**12. Test Field Selection:**
+
+```bash
+# Return only title and price
+curl "http://localhost:3000/entities/Product?select=title,price" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID"
+```
+
+**13. Test Combined Query:**
+
+```bash
+# Complex query: In-stock laptops, under $1500, sorted by price, showing only title and price, first 10 results
+curl "http://localhost:3000/entities/Product?search=title:lklaptop;inStock:true;price:lt1500&sort=price:asc&select=title,price&page=1&limit=10" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID"
+```
+
+**14. Update Product:**
 
 ```bash
 curl -X PUT http://localhost:3000/entities/Product/{id} \
   -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID" \
   -d '{
-    "price": 899.99
+    "price": 1199.99,
+    "inStock": false
   }'
 ```
 
-**7. Delete Product:**
+**15. Delete Product:**
 
 ```bash
-curl -X DELETE http://localhost:3000/entities/Product/{id}
+curl -X DELETE http://localhost:3000/entities/Product/{id} \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -H "x-organization-id: YOUR_ORG_ID"
 ```
 
-## Phase 8: Add Authentication (Optional)
+### Organization Management Examples
 
-### Step 14: Install Passport & JWT
+**Create a new organization:**
 
 ```bash
-npm install @nestjs/passport @nestjs/jwt passport passport-jwt bcrypt
-npm install --save-dev @types/passport-jwt @types/bcrypt
+curl -X POST http://localhost:3000/organizations \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -d '{
+    "name": "My Company",
+    "slug": "my-company",
+    "description": "Company workspace"
+  }'
 ```
 
-Create authentication module and implement JWT strategy. Replace hardcoded `test-user-id` with actual user from JWT token.
+**Invite a member to organization:**
+
+```bash
+curl -X POST http://localhost:3000/organizations/{ORG_ID}/members \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN" \
+  -d '{
+    "email": "colleague@example.com",
+    "role": "admin"
+  }'
+```
+
+**List organization members:**
+
+```bash
+curl http://localhost:3000/organizations/{ORG_ID}/members \
+  -H "Authorization: Bearer YOUR_ACCESS_TOKEN"
+```
 
 ## Summary
 
@@ -821,10 +1366,292 @@ You now have a fully functional dynamic entity system with:
 ✅ Type-safe validation with Zod
 ✅ PostgreSQL with Prisma ORM
 
-**Next Steps:**
-1. Add authentication (JWT)
-2. Add pagination & filtering
-3. Add field relationships (foreign keys)
-4. Add indexing for performance
-5. Add webhooks for entity events
-6. Create admin UI for entity management
+## Phase 8: Advanced Query Features
+
+### Filtering System
+
+The system includes a comprehensive filtering system that supports multiple operators for different field types.
+
+#### Supported Features:
+- **String Operations**: `eq`, `ne`, `lk` (like/contains), `sw` (starts with), `ew` (ends with)
+- **Number/Date Operations**: `lt`, `lte`, `gt`, `gte`
+- **Array Operations**: `in`, `nin` (not in)
+- **Boolean Operations**: `true`, `false`
+- **Null Checks**: `null`, `notnull`
+
+#### Filter Syntax
+
+Filters are specified using the `search` query parameter with the format:
+```
+field:operatorValue;field2:operatorValue2
+```
+
+#### Examples:
+
+**Simple filtering:**
+```bash
+# Products with name containing "laptop"
+GET /entities/Product?search=name:lklaptop
+
+# Products with price less than 1000
+GET /entities/Product?search=price:lt1000
+
+# Active products
+GET /entities/Product?search=inStock:true
+```
+
+**Complex filtering (multiple conditions):**
+```bash
+# Active laptops under $1500
+GET /entities/Product?search=title:lklaptop;price:lt1500;inStock:true
+
+# Products in specific price range
+GET /entities/Product?search=price:gte100;price:lte500
+```
+
+📖 **See [FILTER_API_DOCS.md](./FILTER_API_DOCS.md) for complete filtering documentation.**
+
+### Pagination
+
+The API supports pagination with metadata to help build user interfaces.
+
+#### Query Parameters:
+- `page`: Page number (default: 1, min: 1)
+- `limit`: Items per page (default: 50, min: 1, max: 100)
+
+#### Example:
+```bash
+# Get first 10 products
+GET /entities/Product?page=1&limit=10
+
+# Get second page
+GET /entities/Product?page=2&limit=10
+```
+
+#### Response Format:
+```json
+{
+  "data": [
+    {
+      "id": "uuid",
+      "entityType": "Product",
+      "userId": "user-id",
+      "data": {
+        "title": "Laptop",
+        "price": 999.99,
+        "description": "High-performance laptop",
+        "inStock": true
+      },
+      "createdAt": "2024-01-01T00:00:00Z",
+      "updatedAt": "2024-01-01T00:00:00Z"
+    }
+  ],
+  "meta": {
+    "total": 150,
+    "page": 1,
+    "limit": 10,
+    "totalPages": 15,
+    "hasNextPage": true,
+    "hasPrevPage": false
+  }
+}
+```
+
+### Sorting
+
+Sort results by any field in ascending or descending order.
+
+#### Syntax:
+```
+sort=field:direction
+```
+
+#### Examples:
+```bash
+# Sort by price ascending
+GET /entities/Product?sort=price:asc
+
+# Sort by title descending
+GET /entities/Product?sort=title:desc
+
+# Combine with filters
+GET /entities/Product?search=inStock:true&sort=price:asc
+```
+
+### Field Selection
+
+Return only specific fields to reduce payload size and improve performance.
+
+#### Syntax:
+```
+select=field1,field2,field3
+```
+
+#### Example:
+```bash
+# Return only title and price
+GET /entities/Product?select=title,price
+
+# Combine with filters and sorting
+GET /entities/Product?search=inStock:true&sort=price:asc&select=title,price
+```
+
+### Complete Query Example
+
+Combine all query features for powerful data retrieval:
+
+```bash
+# Get active products with "laptop" in title,
+# priced between $500-$2000,
+# sorted by price ascending,
+# return only title and price,
+# get first 20 results
+GET /entities/Product?search=title:lklaptop;inStock:true;price:gte500;price:lte2000&sort=price:asc&select=title,price&page=1&limit=20
+```
+
+## Phase 9: API Reference
+
+### Entity Definitions API
+
+#### Create Entity Definition
+```http
+POST /entity-definitions
+Content-Type: application/json
+
+{
+  "name": "Product",
+  "fields": [
+    {
+      "name": "title",
+      "type": "string",
+      "required": true,
+      "minLength": 3,
+      "maxLength": 100
+    },
+    {
+      "name": "price",
+      "type": "number",
+      "required": true,
+      "min": 0
+    }
+  ]
+}
+```
+
+#### Get All Entity Definitions
+```http
+GET /entity-definitions
+```
+
+#### Get One Entity Definition
+```http
+GET /entity-definitions/:name
+```
+
+#### Delete Entity Definition
+```http
+DELETE /entity-definitions/:name
+```
+
+### Dynamic Entities API
+
+#### Create Entity
+```http
+POST /entities/:entityType
+Content-Type: application/json
+
+{
+  "title": "Laptop",
+  "price": 999.99
+}
+```
+
+#### Get All Entities (with filters, pagination, sorting)
+```http
+GET /entities/:entityType?search=...&sort=...&page=1&limit=10&select=...
+```
+
+#### Get One Entity
+```http
+GET /entities/:entityType/:id
+```
+
+#### Update Entity (Partial)
+```http
+PUT /entities/:entityType/:id
+Content-Type: application/json
+
+{
+  "price": 899.99
+}
+```
+
+#### Delete Entity
+```http
+DELETE /entities/:entityType/:id
+```
+
+## Summary
+
+You now have a fully functional **multi-tenant** dynamic entity system with:
+
+✅ **Multi-Tenant Architecture**
+  - Organization-based data isolation
+  - Users can belong to multiple organizations
+  - Role-based access control (owner, admin, member)
+  - Automatic organization creation on signup
+
+✅ **Core Features**
+  - Runtime entity creation
+  - Automatic validation based on field definitions
+  - Complete CRUD APIs for dynamic entities
+  - Type-safe validation with Zod
+  - PostgreSQL with Prisma ORM
+
+✅ **Advanced Query Features**
+  - Advanced filtering with multiple operators (eq, ne, lk, sw, ew, lt, gt, in, nin, etc.)
+  - Pagination with metadata (page, limit, totalPages, hasNextPage, hasPrevPage)
+  - Sorting by any field (asc/desc)
+  - Field selection for optimized responses
+  - Complex combined queries
+
+✅ **Security & Authentication**
+  - JWT Authentication
+  - Organization-scoped access control
+  - Request-level organization context via headers
+  - User-role validation
+
+✅ **Data Management**
+  - Organization-scoped entity definitions
+  - Organization-scoped entity data
+  - Complete data isolation between organizations
+  - Member management (invite, remove, update roles)
+
+**Architecture Highlights:**
+- Each organization operates independently
+- Entity names are unique per organization (not globally)
+- All entity operations require organization context (`x-organization-id` header)
+- Validation schemas are cached per organization
+- Users can switch between organizations seamlessly
+
+**Implemented Features:**
+- ✅ Multi-tenant organizations
+- ✅ Organization member management
+- ✅ Role-based permissions
+- ✅ JWT Authentication
+- ✅ Pagination with metadata
+- ✅ Advanced filtering system
+- ✅ Sorting and field selection
+- ✅ Complete data isolation
+
+**Future Enhancements:**
+1. Email invitations for organization members
+2. Organization-level settings and customization
+3. Field relationships (foreign keys between entities)
+4. Indexing for performance optimization
+5. Webhooks for entity events
+6. File upload support
+7. Bulk operations
+8. Export/Import functionality
+9. Activity logs and audit trails
+10. Organization transfer and deletion workflows

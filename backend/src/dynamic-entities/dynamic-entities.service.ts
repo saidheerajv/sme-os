@@ -15,12 +15,12 @@ export class DynamicEntitiesService {
     private queryService: QueryService,
   ) {}
 
-  async create(userId: string, entityType: string, data: unknown): Promise<any> {
+  async create(organizationId: string, entityType: string, data: unknown): Promise<any> {
     // Verify entity definition exists
-    await this.entityDefinitionsService.findOne(userId, entityType);
+    await this.entityDefinitionsService.findOne(organizationId, entityType);
 
-    // Get validation schema
-    const schema = this.validationService.getSchema(entityType);
+    // Get validation schema with org context
+    const schema = this.validationService.getSchema(`${organizationId}:${entityType}`);
     if (!schema) {
       throw new BadRequestException('Validation schema not found. Please restart the application.');
     }
@@ -32,22 +32,22 @@ export class DynamicEntitiesService {
     return this.prisma.dynamicEntity.create({
       data: {
         entityType,
-        userId,
+        organizationId,
         data: validatedData,
       },
     });
   }
 
-  async findAll(userId: string, entityType: string, query?: EntityQueryDto): Promise<any> {
+  async findAll(organizationId: string, entityType: string, query?: EntityQueryDto): Promise<any> {
     // Verify entity definition exists and get field definitions
-    const entityDefinition = await this.entityDefinitionsService.findOne(userId, entityType);
+    const entityDefinition = await this.entityDefinitionsService.findOne(organizationId, entityType);
     const fieldDefinitions = entityDefinition.fields as any[];
 
     // Parse query options
     const options = query ? this.queryService.parseQuery(query, fieldDefinitions) : {};
 
     // Build Prisma query
-    const prismaQuery = this.queryService.buildPrismaQuery(userId, entityType, options);
+    const prismaQuery = this.queryService.buildPrismaQuery(organizationId, entityType, options);
 
     // Execute query
     const entities = await this.prisma.dynamicEntity.findMany(prismaQuery);
@@ -75,9 +75,9 @@ export class DynamicEntitiesService {
     };
   }
 
-  async findOne(userId: string, entityType: string, id: string): Promise<any> {
+  async findOne(organizationId: string, entityType: string, id: string): Promise<any> {
     const entity = await this.prisma.dynamicEntity.findFirst({
-      where: { id, entityType, userId },
+      where: { id, entityType, organizationId },
     });
 
     if (!entity) {
@@ -87,12 +87,12 @@ export class DynamicEntitiesService {
     return entity;
   }
 
-  async update(userId: string, entityType: string, id: string, data: unknown): Promise<any> {
+  async update(organizationId: string, entityType: string, id: string, data: unknown): Promise<any> {
     // Verify entity exists
-    await this.findOne(userId, entityType, id);
+    await this.findOne(organizationId, entityType, id);
 
-    // Get validation schema
-    const schema = this.validationService.getSchema(entityType);
+    // Get validation schema with org context
+    const schema = this.validationService.getSchema(`${organizationId}:${entityType}`);
     if (!schema) {
       throw new BadRequestException('Validation schema not found');
     }
@@ -107,9 +107,9 @@ export class DynamicEntitiesService {
     });
   }
 
-  async delete(userId: string, entityType: string, id: string): Promise<any> {
+  async delete(organizationId: string, entityType: string, id: string): Promise<any> {
     // Verify entity exists
-    await this.findOne(userId, entityType, id);
+    await this.findOne(organizationId, entityType, id);
 
     await this.prisma.dynamicEntity.delete({
       where: { id },

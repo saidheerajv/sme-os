@@ -90,11 +90,11 @@ export class QueryService {
   /**
    * Build Prisma query from options
    */
-  buildPrismaQuery(userId: string, entityType: string, options: QueryOptions): any {
+  buildPrismaQuery(organizationId: string, entityType: string, options: QueryOptions): any {
     const query: any = {
       where: {
         entityType,
-        userId,
+        organizationId,
         ...options.filters,
       },
     };

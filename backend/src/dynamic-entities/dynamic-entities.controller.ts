@@ -13,11 +13,12 @@ import {
 } from '@nestjs/common';
 import { DynamicEntitiesService } from './dynamic-entities.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { OrganizationGuard } from '../organizations/guards/organization.guard';
+import { CurrentOrganization } from '../organizations/decorators/current-organization.decorator';
 import { EntityQueryDto } from './dto/entity-query.dto';
 
 @Controller('entities/:entityType')
-@UseGuards(JwtAuthGuard)
+@UseGuards(JwtAuthGuard, OrganizationGuard)
 export class DynamicEntitiesController {
   
   constructor(private readonly service: DynamicEntitiesService) {}
@@ -25,48 +26,48 @@ export class DynamicEntitiesController {
   @Post()
   @HttpCode(HttpStatus.CREATED)
   async create(
-    @CurrentUser() user: any,
+    @CurrentOrganization() org: any,
     @Param('entityType') entityType: string,
     @Body() data: unknown,
   ) {
-    return this.service.create(user.id, entityType, data);
+    return this.service.create(org.id, entityType, data);
   }
 
   @Get()
   async findAll(
-    @CurrentUser() user: any,
+    @CurrentOrganization() org: any,
     @Param('entityType') entityType: string,
     @Query() query: EntityQueryDto,
   ) {
-    return this.service.findAll(user.id, entityType, query);
+    return this.service.findAll(org.id, entityType, query);
   }
 
   @Get(':id')
   async findOne(
-    @CurrentUser() user: any,
+    @CurrentOrganization() org: any,
     @Param('entityType') entityType: string,
     @Param('id') id: string,
   ) {
-    return this.service.findOne(user.id, entityType, id);
+    return this.service.findOne(org.id, entityType, id);
   }
 
   @Put(':id')
   async update(
-    @CurrentUser() user: any,
+    @CurrentOrganization() org: any,
     @Param('entityType') entityType: string,
     @Param('id') id: string,
     @Body() data: unknown,
   ) {
-    return this.service.update(user.id, entityType, id, data);
+    return this.service.update(org.id, entityType, id, data);
   }
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
   async delete(
-    @CurrentUser() user: any,
+    @CurrentOrganization() org: any,
     @Param('entityType') entityType: string,
     @Param('id') id: string,
   ) {
-    await this.service.delete(user.id, entityType, id);
+    await this.service.delete(org.id, entityType, id);
   }
 }

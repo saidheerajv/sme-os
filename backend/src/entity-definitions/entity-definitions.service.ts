@@ -12,14 +12,17 @@ export class EntityDefinitionsService {
     private validationService: ValidationService,
   ) {}
 
-  async create(userId: string, dto: CreateEntityDefinitionDto): Promise<EntityDefinition> {
-    // Check if entity name already exists
-    const existing = await this.prisma.entityDefinition.findUnique({
-      where: { name: dto.name },
+  async create(organizationId: string, dto: CreateEntityDefinitionDto): Promise<EntityDefinition> {
+    // Check if entity name already exists in this organization
+    const existing = await this.prisma.entityDefinition.findFirst({
+      where: { 
+        name: dto.name,
+        organizationId,
+      },
     });
 
     if (existing) {
-      throw new ConflictException(`Entity with name "${dto.name}" already exists`);
+      throw new ConflictException(`Entity with name "${dto.name}" already exists in this organization`);
     }
 
     // Convert name to table name (lowercase, snake_case)
@@ -30,28 +33,28 @@ export class EntityDefinitionsService {
       data: {
         name: dto.name,
         tableName,
-        userId,
+        organizationId,
         fields: dto.fields as any,
       },
     });
 
-    // Generate and cache validation schema
+    // Generate and cache validation schema with org context
     const schema = this.validationService.generateSchema(dto.fields);
-    this.validationService.cacheSchema(dto.name, schema);
+    this.validationService.cacheSchema(`${organizationId}:${dto.name}`, schema);
 
     return entityDefinition;
   }
 
-  async findAll(userId: string): Promise<EntityDefinition[]> {
+  async findAll(organizationId: string): Promise<EntityDefinition[]> {
     return this.prisma.entityDefinition.findMany({
-      where: { userId },
+      where: { organizationId },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async findOne(userId: string, name: string): Promise<EntityDefinition> {
+  async findOne(organizationId: string, name: string): Promise<EntityDefinition> {
     const entity = await this.prisma.entityDefinition.findFirst({
-      where: { name, userId },
+      where: { name, organizationId },
     });
 
     if (!entity) {
@@ -61,9 +64,9 @@ export class EntityDefinitionsService {
     return entity;
   }
 
-  async update(userId: string, name: string, dto: UpdateEntityDefinitionDto): Promise<EntityDefinition> {
-    // Verify entity exists and user owns it
-    const entity = await this.findOne(userId, name);
+  async update(organizationId: string, name: string, dto: UpdateEntityDefinitionDto): Promise<EntityDefinition> {
+    // Verify entity exists and belongs to organization
+    const entity = await this.findOne(organizationId, name);
 
     // Update entity definition
     const updatedEntity = await this.prisma.entityDefinition.update({
@@ -73,21 +76,21 @@ export class EntityDefinitionsService {
       },
     });
 
-    // Regenerate and cache validation schema
+    // Regenerate and cache validation schema with org context
     if (dto.fields) {
       const schema = this.validationService.generateSchema(dto.fields);
-      this.validationService.cacheSchema(name, schema);
+      this.validationService.cacheSchema(`${organizationId}:${name}`, schema);
     }
 
     return updatedEntity;
   }
 
-  async delete(userId: string, name: string): Promise<void> {
-    const entity = await this.findOne(userId, name);
+  async delete(organizationId: string, name: string): Promise<void> {
+    const entity = await this.findOne(organizationId, name);
 
-    // Delete all dynamic entities of this type
+    // Delete all dynamic entities of this type in this organization
     await this.prisma.dynamicEntity.deleteMany({
-      where: { entityType: name, userId },
+      where: { entityType: name, organizationId },
     });
 
     // Delete entity definition
@@ -95,8 +98,8 @@ export class EntityDefinitionsService {
       where: { id: entity.id },
     });
 
-    // Clear validation cache
-    this.validationService.clearCache(name);
+    // Clear validation cache with org context
+    this.validationService.clearCache(`${organizationId}:${name}`);
   }
 
   async loadAllSchemasToCache(): Promise<void> {
@@ -104,7 +107,8 @@ export class EntityDefinitionsService {
     
     definitions.forEach((def) => {
       const schema = this.validationService.generateSchema(def.fields as any);
-      this.validationService.cacheSchema(def.name, schema);
+      // Cache with organization context
+      this.validationService.cacheSchema(`${def.organizationId}:${def.name}`, schema);
     });
   }
 }
