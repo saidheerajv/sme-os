@@ -1,6 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, TextInput, Button, Select } from 'flowbite-react';
-import { HiSearch, HiX } from 'react-icons/hi';
+import { HiX } from 'react-icons/hi';
+import debounce from 'lodash/debounce';
 import type { FieldDefinition } from '../types/entity.types';
 
 interface SearchModuleProps {
@@ -14,28 +15,16 @@ interface SearchField {
   operator: string;
 }
 
-// NOTE: Server supports more operators (lk, sw, ew, gt, lt, etc.) but we're starting with 'eq' only
+// NOTE: Server supports more operators (lk, sw, ew, gt, lt, etc.) but we're using 'lk' (like) as default
 // Additional operators will be implemented in future iterations
 const SearchModule: React.FC<SearchModuleProps> = ({ fields, onSearch }) => {
   const [searchFields, setSearchFields] = useState<Record<string, SearchField>>({});
 
-  // Handle field value change
-  const handleFieldChange = (fieldName: string, value: string) => {
-    setSearchFields(prev => ({
-      ...prev,
-      [fieldName]: {
-        name: fieldName,
-        value,
-        operator: 'eq', // Using 'eq' operator as default
-      },
-    }));
-  };
-
   // Build search query string
-  const buildSearchQuery = (): string => {
+  const buildSearchQuery = (fieldsData: Record<string, SearchField>): string => {
     const queries: string[] = [];
     
-    Object.values(searchFields).forEach(field => {
+    Object.values(fieldsData).forEach(field => {
       if (field.value.trim()) {
         const fieldDef = fields.find(f => f.name === field.name);
         
@@ -43,7 +32,7 @@ const SearchModule: React.FC<SearchModuleProps> = ({ fields, onSearch }) => {
         if (fieldDef?.type === 'boolean') {
           queries.push(`${field.name}:${field.value}`);
         } else {
-          queries.push(`${field.name}:eq${field.value.trim()}`);
+          queries.push(`${field.name}:lk${field.value.trim()}`);
         }
       }
     });
@@ -51,54 +40,69 @@ const SearchModule: React.FC<SearchModuleProps> = ({ fields, onSearch }) => {
     return queries.join(';');
   };
 
-  // Handle search submit
-  const handleSearch = () => {
-    const query = buildSearchQuery();
-    onSearch(query);
-  };
+  // Create debounced search function
+  const debouncedSearch = useRef(
+    debounce((fieldsData: Record<string, SearchField>) => {
+      const query = buildSearchQuery(fieldsData);
+      onSearch(query);
+    }, 500)
+  ).current;
+
+  // Cleanup debounce on unmount
+  useEffect(() => {
+    return () => {
+      debouncedSearch.cancel();
+    };
+  }, [debouncedSearch]);
+
+  // Handle field value change
+  const handleFieldChange = useCallback((fieldName: string, value: string) => {
+    setSearchFields(prev => {
+      const updated = {
+        ...prev,
+        [fieldName]: {
+          name: fieldName,
+          value,
+          operator: 'lk', // Using 'lk' (like) operator as default
+        },
+      };
+      
+      // Automatically trigger debounced search
+      debouncedSearch(updated);
+      
+      return updated;
+    });
+  }, [debouncedSearch]);
 
   // Handle clear search
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setSearchFields({});
+    debouncedSearch.cancel(); // Cancel any pending debounced calls
     onSearch('');
-  };
+  }, [debouncedSearch, onSearch]);
 
   // Check if any search is active
   const hasActiveSearch = Object.values(searchFields).some(field => field.value.trim());
 
-  return (
-    <Card className="mb-4">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold flex items-center gap-2">
-          <HiSearch className="w-5 h-5" />
-          Search Filters
-        </h3>
-        {hasActiveSearch && (
-          <Button size="sm" color="gray" onClick={handleClear}>
-            <HiX className="mr-1 h-4 w-4" />
-            Clear All
-          </Button>
-        )}
-      </div>
+  // Limit to first 4 fields
+  const displayFields = fields.slice(0, 4);
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
-        {fields.map(field => {
+  return (
+    <Card className="mb-4 py-2">
+      <div className="grid grid-cols-4 gap-2 items-center">
+        {displayFields.map(field => {
           const currentValue = searchFields[field.name]?.value || '';
 
           return (
-            <div key={field.name} className="space-y-2">
-              <label htmlFor={`search-${field.name}`} className="block text-sm font-medium text-gray-900">
-                {field.displayName || field.name}
-              </label>
-              
-              {/* Value input based on field type */}
+            <div key={field.name}>
               {field.type === 'boolean' ? (
                 <Select
                   id={`search-${field.name}`}
                   value={currentValue}
                   onChange={(e) => handleFieldChange(field.name, e.target.value)}
+                  sizing="sm"
                 >
-                  <option value="">Select...</option>
+                  <option value="">{field.displayName || field.name}</option>
                   <option value="true">True</option>
                   <option value="false">False</option>
                 </Select>
@@ -108,6 +112,8 @@ const SearchModule: React.FC<SearchModuleProps> = ({ fields, onSearch }) => {
                   type="date"
                   value={currentValue}
                   onChange={(e) => handleFieldChange(field.name, e.target.value)}
+                  placeholder={field.displayName || field.name}
+                  sizing="sm"
                 />
               ) : field.type === 'number' ? (
                 <TextInput
@@ -115,7 +121,8 @@ const SearchModule: React.FC<SearchModuleProps> = ({ fields, onSearch }) => {
                   type="number"
                   value={currentValue}
                   onChange={(e) => handleFieldChange(field.name, e.target.value)}
-                  placeholder={`Search ${field.displayName || field.name}`}
+                  placeholder={field.displayName || field.name}
+                  sizing="sm"
                 />
               ) : (
                 <TextInput
@@ -123,22 +130,37 @@ const SearchModule: React.FC<SearchModuleProps> = ({ fields, onSearch }) => {
                   type="text"
                   value={currentValue}
                   onChange={(e) => handleFieldChange(field.name, e.target.value)}
-                  placeholder={`Search ${field.displayName || field.name}`}
+                  placeholder={field.displayName || field.name}
+                  sizing="sm"
                 />
               )}
             </div>
           );
         })}
-      </div>
-
-      <div className="flex justify-end">
-        <Button onClick={handleSearch} color="blue">
-          <HiSearch className="mr-2 h-5 w-5" />
-          Apply Filters
-        </Button>
+        {hasActiveSearch && (
+          <Button size="xs" color="gray" onClick={handleClear} className="ml-auto">
+            <HiX className="h-4 w-4" />
+          </Button>
+        )}
       </div>
     </Card>
   );
 };
 
-export default SearchModule;
+SearchModule.displayName = 'SearchModule';
+
+// Custom comparison function to prevent re-renders when fields haven't actually changed
+const arePropsEqual = (prevProps: SearchModuleProps, nextProps: SearchModuleProps) => {
+  // Check if fields array is the same or has the same content
+  if (prevProps.fields.length !== nextProps.fields.length) return false;
+  
+  const fieldsEqual = prevProps.fields.every((field, index) => 
+    field.name === nextProps.fields[index]?.name &&
+    field.type === nextProps.fields[index]?.type &&
+    field.displayName === nextProps.fields[index]?.displayName
+  );
+  
+  return fieldsEqual;
+};
+
+export default React.memo(SearchModule, arePropsEqual);

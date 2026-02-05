@@ -5,6 +5,7 @@ import {
 } from 'flowbite-react';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { DarkThemeToggle } from "flowbite-react";
 
 
 const DashboardHome: React.FC = () => {
@@ -18,6 +19,7 @@ const DashboardHome: React.FC = () => {
         <h1 className="text-3xl font-bold mb-2">Welcome to Your CMS Dashboard</h1>
         <h2 className="text-xl mb-1">Hello, {user?.name}! You are successfully logged in.</h2>
         <p className="opacity-90">Email: {user?.email}</p>
+        <DarkThemeToggle className="mt-4 mx-auto" />
       </Card>
 
       {/* Feature Cards */}

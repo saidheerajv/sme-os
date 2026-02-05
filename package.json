@@ -16,7 +16,9 @@
     "@mui/material": "^7.3.4",
     "@nestjs/serve-static": "^5.0.4",
     "@tanstack/react-table": "^8.21.3",
+    "@types/lodash": "^4.17.21",
     "axios": "^1.13.1",
-    "flowbite-react": "^0.12.10"
+    "flowbite-react": "^0.12.10",
+    "lodash": "^4.17.21"
   }
 }
