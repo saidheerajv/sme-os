@@ -9,7 +9,7 @@ import { DarkThemeToggle } from "flowbite-react";
 
 
 const DashboardHome: React.FC = () => {
-  const { user } = useAuth();
+  const { user, currentOrganization, organizations } = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -67,6 +67,33 @@ const DashboardHome: React.FC = () => {
           </div>
         </div>
       </Card>
+
+      {/* Organization Info Card */}
+      {currentOrganization && (
+        <Card className="p-6 mt-6">
+          <h3 className="text-lg font-semibold mb-4">Current Organization</h3>
+          <div className="flex flex-wrap gap-8 mb-4">
+            <div className="flex-1 min-w-[200px]">
+              <p className="text-sm text-gray-500">Organization Name</p>
+              <p className="text-base font-medium">{currentOrganization.name}</p>
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <p className="text-sm text-gray-500">Organization Slug</p>
+              <p className="text-base">{currentOrganization.slug}</p>
+            </div>
+            <div className="flex-1 min-w-[200px]">
+              <p className="text-sm text-gray-500">Total Organizations</p>
+              <p className="text-base">{organizations.length}</p>
+            </div>
+          </div>
+          {currentOrganization.description && (
+            <div>
+              <p className="text-sm text-gray-500">Description</p>
+              <p className="text-base">{currentOrganization.description}</p>
+            </div>
+          )}
+        </Card>
+      )}
     </div>
   );
 };

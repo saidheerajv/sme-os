@@ -50,7 +50,7 @@ export interface EntityDefinition {
   id: string;
   name: string;
   tableName: string;
-  userId: string;
+  organizationId: string;
   fields: FieldDefinition[];
   searchFields?: SearchFieldConfig[];
   createdAt: string;

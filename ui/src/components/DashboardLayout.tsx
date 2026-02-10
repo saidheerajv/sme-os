@@ -5,17 +5,23 @@ import { FaTachometerAlt, FaUser, FaSignOutAlt, FaDatabase, FaHome, FaBars } fro
 import type { EntityDefinition } from '../types/entity.types';
 import { entityDefinitionsApi } from '../services/entityDefinitions.api';
 import { useAuth } from '../contexts/AuthContext';
+import OrganizationSelector from './OrganizationSelector';
 
 const DashboardLayout: React.FC = () => {
-    const { user, logout } = useAuth();
+    const { user, logout, currentOrganization } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = React.useState(false);
     const [entities, setEntities] = React.useState<EntityDefinition[]>([]);
 
+    // Reload entities when organization changes
     React.useEffect(() => {
-        loadEntities();
-    }, []);
+        if (currentOrganization) {
+            loadEntities();
+        } else {
+            setEntities([]);
+        }
+    }, [currentOrganization]);
 
     const loadEntities = async () => {
         try {
@@ -55,6 +61,7 @@ const DashboardLayout: React.FC = () => {
                     </Link>
                 </div>
                 <div className="flex items-center gap-4">
+                    <OrganizationSelector className="hidden md:flex" />
                     <div className="flex items-center gap-2">
                         <FaUser />
                         <span className="text-sm hidden sm:inline">{user?.name}</span>
@@ -74,6 +81,11 @@ const DashboardLayout: React.FC = () => {
                     `}
                 >
                     <div className="h-full px-3 py-4 overflow-y-auto">
+                        {/* Organization Selector for Mobile */}
+                        <div className="mb-4 pb-4 border-b border-gray-200 md:hidden">
+                            <OrganizationSelector />
+                        </div>
+
                         <ul className="space-y-2 font-medium">
                             {navItems.map((item) => {
                                 const isActive = location.pathname.includes(item.path);

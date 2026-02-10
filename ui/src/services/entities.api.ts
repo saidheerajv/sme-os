@@ -7,9 +7,19 @@ export interface EntityRecord {
   [key: string]: any;
 }
 
+export interface EntityListResponse {
+  data: EntityRecord[];
+  meta?: {
+    total?: number;
+    page?: number;
+    limit?: number;
+    totalPages?: number;
+  };
+}
+
 export const entitiesApi = {
   // Get all records for an entity type
-  async getAll(entityType: string, searchQuery?: string): Promise<EntityRecord[]> {
+  async getAll(entityType: string, searchQuery?: string): Promise<EntityListResponse> {
     const url = searchQuery 
       ? `${API_BASE_URL}/entities/${entityType}?search=${encodeURIComponent(searchQuery)}`
       : `${API_BASE_URL}/entities/${entityType}`;

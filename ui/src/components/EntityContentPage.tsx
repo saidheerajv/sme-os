@@ -29,13 +29,17 @@ const EntityContentPage: React.FC = () => {
             setLoading(true);
             setError(null);
             try {
-                const [schema, data]:any = await Promise.all([
+                const [schema, response] = await Promise.all([
                     entityDefinitionsApi.getByName(entityName),
                     entitiesApi.getAll(entityName, searchQuery)
                 ]);
 
                 setEntitySchema(schema);
-                setEntityData(data.data.map((item: any) => item.data));
+                // Extract the actual data from each entity record
+                setEntityData(response.data.map((item: any) => ({
+                    id: item.id,
+                    ...item.data
+                })));
             } catch (err: any) {
                 setError(err.response?.data?.message || 'Failed to load entity data');
             } finally {
@@ -79,12 +83,17 @@ const EntityContentPage: React.FC = () => {
         try {
             if (editingRecord) {
                 const updated = await entitiesApi.update(entityName, editingRecord.id, submittedFormData);
-                setEntityData(prev => prev.map(item => item.id === editingRecord.id ? updated : item));
+                // Extract data with id
+                const updatedData = { id: updated.id, ...updated.data };
+                setEntityData(prev => prev.map(item => item.id === editingRecord.id ? updatedData : item));
             } else {
                 await entitiesApi.create(entityName, submittedFormData);
                 // Refresh data after creation
-                const data: any = await entitiesApi.getAll(entityName, searchQuery);
-                setEntityData(data.data.map((item: any) => item.data));
+                const response = await entitiesApi.getAll(entityName, searchQuery);
+                setEntityData(response.data.map((item: any) => ({
+                    id: item.id,
+                    ...item.data
+                })));
             }
             setShowModal(false);
             setFormData({});
