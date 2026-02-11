@@ -1,5 +1,5 @@
 import axios from 'axios';
-import type { Organization, CreateOrganizationDto, UpdateOrganizationDto, OrganizationMember, InviteMemberDto, UpdateMemberRoleDto } from '../types/organization.types';
+import type { Organization, OrganizationMember, InviteMemberDto, UpdateMemberRoleDto, CreateUserDto } from '../types/organization.types';
 
 const API_BASE_URL = '/api';
 
@@ -16,23 +16,6 @@ export const organizationsApi = {
     return response.data;
   },
 
-  // Create new organization
-  async create(data: CreateOrganizationDto): Promise<Organization> {
-    const response = await axios.post(`${API_BASE_URL}/organizations`, data);
-    return response.data;
-  },
-
-  // Update organization
-  async update(id: string, data: UpdateOrganizationDto): Promise<Organization> {
-    const response = await axios.put(`${API_BASE_URL}/organizations/${id}`, data);
-    return response.data;
-  },
-
-  // Delete organization
-  async delete(id: string): Promise<void> {
-    await axios.delete(`${API_BASE_URL}/organizations/${id}`);
-  },
-
   // Get organization members
   async getMembers(id: string): Promise<OrganizationMember[]> {
     const response = await axios.get(`${API_BASE_URL}/organizations/${id}/members`);
@@ -42,6 +25,12 @@ export const organizationsApi = {
   // Invite member to organization
   async inviteMember(id: string, data: InviteMemberDto): Promise<OrganizationMember> {
     const response = await axios.post(`${API_BASE_URL}/organizations/${id}/members`, data);
+    return response.data;
+  },
+
+  // Create user in organization
+  async createUser(id: string, data: CreateUserDto): Promise<OrganizationMember> {
+    const response = await axios.post(`${API_BASE_URL}/organizations/${id}/users`, data);
     return response.data;
   },
 

@@ -9,6 +9,7 @@ import DashboardHome from './components/DashboardHome';
 import EntityDefinitionsPage from './components/EntityDefinitionsPage';
 import EntityDefinitionFormPage from './components/EntityDefinitionFormPage';
 import EntityContentPage from './components/EntityContentPage';
+import UsersPageWrapper from './components/UsersPageWrapper';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingScreen from './components/LoadingScreen';
 import ErrorBoundary from './components/ErrorBoundary';
@@ -43,6 +44,7 @@ const AppContent: React.FC = () => {
         <Route path="entity-definitions/new" element={<EntityDefinitionFormPage />} />
         <Route path="entity-definitions/edit/:entityName" element={<EntityDefinitionFormPage />} />
         <Route path="content/:entityName" element={<EntityContentPage />} />
+        <Route path="users" element={<UsersPageWrapper />} />
         <Route path="overview" element={<DashboardHome />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />

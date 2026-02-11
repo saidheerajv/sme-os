@@ -13,4 +13,8 @@ export class SignupDto {
   @IsString()
   @IsNotEmpty()
   name: string;
+
+  @IsString()
+  @IsNotEmpty()
+  organizationName: string;
 }

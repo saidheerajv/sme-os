@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navbar, Button } from 'flowbite-react';
 import { Outlet, Link, useLocation, useNavigate } from 'react-router-dom';
-import { FaTachometerAlt, FaUser, FaSignOutAlt, FaDatabase, FaHome, FaBars } from 'react-icons/fa';
+import { FaTachometerAlt, FaUser, FaSignOutAlt, FaDatabase, FaHome, FaBars, FaUsers } from 'react-icons/fa';
 import type { EntityDefinition } from '../types/entity.types';
 import { entityDefinitionsApi } from '../services/entityDefinitions.api';
 import { useAuth } from '../contexts/AuthContext';
@@ -40,6 +40,7 @@ const DashboardLayout: React.FC = () => {
     const navItems = [
         { path: '/dashboard/overview', label: 'Overview', icon: FaHome },
         { path: '/dashboard/entity-definitions', label: 'Entities Definition', icon: FaDatabase },
+        { path: '/dashboard/users', label: 'Users', icon: FaUsers },
     ];
 
     return (

@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 const AuthCard: React.FC = () => {
   const [tab, setTab] = useState<'login' | 'signup'>('login');
   const [loginData, setLoginData] = useState({ email: '', password: '' });
-  const [signupData, setSignupData] = useState({ email: '', password: '', name: '' });
+  const [signupData, setSignupData] = useState({ email: '', password: '', name: '', organizationName: '' });
   const { login, signup, isLoading, error } = useAuth();
   const navigate = useNavigate();
 
@@ -27,7 +27,7 @@ const AuthCard: React.FC = () => {
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      await signup(signupData.email, signupData.password, signupData.name);
+      await signup(signupData.email, signupData.password, signupData.name, signupData.organizationName);
       navigate('/dashboard');
     } catch (err) {
       // Error is handled by the auth context
@@ -116,6 +116,19 @@ const AuthCard: React.FC = () => {
                 autoFocus
                 value={signupData.name}
                 onChange={(e) => setSignupData({ ...signupData, name: e.target.value })}
+                className="mt-1"
+              />
+            </div>
+            <div>
+              <Label htmlFor="signup-organization">Business Name</Label>
+              <TextInput
+                id="signup-organization"
+                name="organizationName"
+                type="text"
+                placeholder="Your Company Name"
+                required
+                value={signupData.organizationName}
+                onChange={(e) => setSignupData({ ...signupData, organizationName: e.target.value })}
                 className="mt-1"
               />
             </div>

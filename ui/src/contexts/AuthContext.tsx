@@ -19,7 +19,7 @@ interface AuthContextType {
   setCurrentOrganization: (org: Organization | null) => void;
   refreshOrganizations: () => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name: string) => Promise<void>;
+  signup: (email: string, password: string, name: string, organizationName: string) => Promise<void>;
   logout: () => void;
   isLoading: boolean;
   error: string | null;
@@ -137,7 +137,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
   };
 
-  const signup = async (email: string, password: string, name: string): Promise<void> => {
+  const signup = async (email: string, password: string, name: string, organizationName: string): Promise<void> => {
     setIsLoading(true);
     setError(null);
     
@@ -146,6 +146,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         email,
         password,
         name,
+        organizationName,
       });
       
       const { user, accessToken, defaultOrganization } = response.data;

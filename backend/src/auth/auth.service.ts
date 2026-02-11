@@ -13,7 +13,7 @@ export class AuthService {
   ) {}
 
   async signup(signupDto: SignupDto) {
-    const { email, password, name } = signupDto;
+    const { email, password, name, organizationName } = signupDto;
 
     // Check if user already exists
     const existingUser = await this.prisma.user.findUnique({
@@ -39,7 +39,7 @@ export class AuthService {
             role: 'owner',
             organization: {
               create: {
-                name: `${name}'s Organization`,
+                name: organizationName,
                 slug: `${email.split('@')[0]}-org-${Date.now()}`,
                 description: 'Default organization',
               },

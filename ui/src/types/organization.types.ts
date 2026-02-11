@@ -22,23 +22,18 @@ export interface OrganizationMember {
   };
 }
 
-export interface CreateOrganizationDto {
-  name: string;
-  slug: string;
-  description?: string;
-}
-
-export interface UpdateOrganizationDto {
-  name?: string;
-  slug?: string;
-  description?: string;
-}
-
 export interface InviteMemberDto {
   email: string;
   role: 'admin' | 'member';
 }
 
 export interface UpdateMemberRoleDto {
+  role: 'admin' | 'member';
+}
+
+export interface CreateUserDto {
+  email: string;
+  password: string;
+  name: string;
   role: 'admin' | 'member';
 }

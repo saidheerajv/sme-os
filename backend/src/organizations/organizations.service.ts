@@ -1,54 +1,13 @@
 import { Injectable, NotFoundException, ConflictException, ForbiddenException, BadRequestException } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { CreateOrganizationDto } from './dto/create-organization.dto';
-import { UpdateOrganizationDto } from './dto/update-organization.dto';
 import { InviteMemberDto } from './dto/invite-member.dto';
 import { UpdateMemberRoleDto } from './dto/update-member-role.dto';
+import { CreateUserDto } from './dto/create-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class OrganizationsService {
   constructor(private prisma: PrismaService) {}
-
-  async create(userId: string, dto: CreateOrganizationDto) {
-    // Check if slug is already taken
-    const existing = await this.prisma.organization.findUnique({
-      where: { slug: dto.slug },
-    });
-
-    if (existing) {
-      throw new ConflictException(`Organization with slug "${dto.slug}" already exists`);
-    }
-
-    // Create organization with the creator as owner
-    const organization = await this.prisma.organization.create({
-      data: {
-        name: dto.name,
-        slug: dto.slug,
-        description: dto.description,
-        members: {
-          create: {
-            userId,
-            role: 'owner',
-          },
-        },
-      },
-      include: {
-        members: {
-          include: {
-            user: {
-              select: {
-                id: true,
-                email: true,
-                name: true,
-              },
-            },
-          },
-        },
-      },
-    });
-
-    return organization;
-  }
 
   async findAllForUser(userId: string) {
     const memberships = await this.prisma.organizationMember.findMany({
@@ -88,17 +47,6 @@ export class OrganizationsService {
     if (!organization) {
       throw new NotFoundException('Organization not found');
     }
-
-    return organization;
-  }
-
-  async update(userId: string, organizationId: string, dto: UpdateOrganizationDto) {
-    await this.checkUserRole(userId, organizationId, ['owner', 'admin']);
-
-    const organization = await this.prisma.organization.update({
-      where: { id: organizationId },
-      data: dto,
-    });
 
     return organization;
   }
@@ -156,6 +104,65 @@ export class OrganizationsService {
     });
 
     return member;
+  }
+
+  async createUser(currentUserId: string, organizationId: string, dto: CreateUserDto) {
+    await this.checkUserRole(currentUserId, organizationId, ['owner', 'admin']);
+
+    // Check if user with this email already exists
+    const existingUser = await this.prisma.user.findUnique({
+      where: { email: dto.email },
+    });
+
+    if (existingUser) {
+      throw new ConflictException('User with this email already exists');
+    }
+
+    // Hash password
+    const saltRounds = 10;
+    const hashedPassword = await bcrypt.hash(dto.password, saltRounds);
+
+    // Create user and add them to the organization
+    const user = await this.prisma.user.create({
+      data: {
+        email: dto.email,
+        password: hashedPassword,
+        name: dto.name,
+        organizationMembers: {
+          create: {
+            organizationId,
+            role: dto.role,
+          },
+        },
+      },
+      select: {
+        id: true,
+        email: true,
+        name: true,
+        createdAt: true,
+        updatedAt: true,
+        organizationMembers: {
+          where: { organizationId },
+          select: {
+            id: true,
+            role: true,
+            createdAt: true,
+          },
+        },
+      },
+    });
+
+    return {
+      id: user.organizationMembers[0].id,
+      role: user.organizationMembers[0].role,
+      createdAt: user.organizationMembers[0].createdAt,
+      updatedAt: user.organizationMembers[0].createdAt,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
+    };
   }
 
   async removeMember(userId: string, organizationId: string, memberId: string) {
