@@ -1,0 +1,51 @@
+erDiagram
+    User ||--o{ OrganizationMember : "has memberships"
+    Organization ||--o{ OrganizationMember : "has members"
+    Organization ||--o{ EntityDefinition : "defines entities"
+    Organization ||--o{ DynamicEntity : "owns data"
+    
+    User {
+        uuid id PK
+        string email UK "unique"
+        string password
+        string name
+        datetime createdAt
+        datetime updatedAt
+    }
+    
+    Organization {
+        uuid id PK
+        string name
+        string slug UK "unique, URL-friendly"
+        string description "nullable"
+        datetime createdAt
+        datetime updatedAt
+    }
+    
+    OrganizationMember {
+        uuid id PK
+        uuid userId FK
+        uuid organizationId FK
+        string role "owner|admin|member"
+        datetime createdAt
+        datetime updatedAt
+    }
+    
+    EntityDefinition {
+        uuid id PK
+        string name "e.g. Product, Customer"
+        string tableName "e.g. product, customer"
+        uuid organizationId FK "TENANT ISOLATION"
+        json fields "Field definitions"
+        datetime createdAt
+        datetime updatedAt
+    }
+    
+    DynamicEntity {
+        uuid id PK
+        string entityType "References EntityDefinition.name"
+        uuid organizationId FK "TENANT ISOLATION"
+        json data "Actual entity data"
+        datetime createdAt
+        datetime updatedAt
+    }
