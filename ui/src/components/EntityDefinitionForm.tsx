@@ -327,7 +327,7 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
             </div>
             
             {/* Data Table Configuration */}
-            <div className="mt-3 p-3 bg-blue-50 rounded">
+            <div className="mt-3 p-3 bg-primary-50 rounded">
               <div className="text-sm font-semibold mb-2">Data Table Configuration</div>
               <div className="flex flex-col gap-2">
                 <div className="flex items-center gap-2">

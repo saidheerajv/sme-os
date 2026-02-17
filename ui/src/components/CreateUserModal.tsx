@@ -49,7 +49,7 @@ const CreateUserModal: React.FC<Props> = ({ isOpen, onClose, onSubmit }) => {
     <Modal show={isOpen} onClose={onClose} size="md">
       <div className="p-6">
         <div className="flex items-center gap-2 mb-6">
-          <FaUserPlus className="text-blue-600 text-xl" />
+          <FaUserPlus className="text-primary-600 text-xl" />
           <h3 className="text-xl font-semibold">Create New User</h3>
         </div>
         

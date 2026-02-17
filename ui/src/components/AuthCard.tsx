@@ -39,7 +39,7 @@ const AuthCard: React.FC = () => {
       <div className="flex mb-4 border-b">
         <Button
           color="light"
-          className={`flex-1 py-2 text-center font-semibold rounded-none ${tab === 'login' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}
+          className={`flex-1 py-2 text-center font-semibold rounded-none ${tab === 'login' ? 'border-b-2 border-primary-600 text-primary-600' : 'text-gray-500'}`}
           onClick={() => handleTabChange('login')}
           type="button"
         >
@@ -47,7 +47,7 @@ const AuthCard: React.FC = () => {
         </Button>
         <Button
           color="light"
-          className={`flex-1 py-2 text-center font-semibold rounded-none ${tab === 'signup' ? 'border-b-2 border-blue-600 text-blue-600' : 'text-gray-500'}`}
+          className={`flex-1 py-2 text-center font-semibold rounded-none ${tab === 'signup' ? 'border-b-2 border-primary-600 text-primary-600' : 'text-gray-500'}`}
           onClick={() => handleTabChange('signup')}
           type="button"
         >

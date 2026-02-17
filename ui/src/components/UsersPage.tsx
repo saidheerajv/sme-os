@@ -59,7 +59,7 @@ const UsersPage: React.FC<Props> = ({ organizationId }) => {
       case 'owner':
         return <FaCrown className="text-yellow-500" />;
       case 'admin':
-        return <FaUserShield className="text-blue-600" />;
+        return <FaUserShield className="text-primary-600" />;
       default:
         return <FaUser className="text-gray-500" />;
     }
@@ -137,7 +137,7 @@ const UsersPage: React.FC<Props> = ({ organizationId }) => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <div className="flex items-center gap-3">
                       <div className="shrink-0">
-                        <div className="h-10 w-10 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center">
+                        <div className="h-10 w-10 rounded-full bg-primary-100 dark:bg-primary-900 flex items-center justify-center">
                           {getRoleIcon(member.role)}
                         </div>
                       </div>
