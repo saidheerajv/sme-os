@@ -2,8 +2,27 @@
 @plugin "flowbite-react/plugin/tailwindcss";
 @source "../.flowbite-react/class-list.json";
 
+/* Raleway Font */
+@font-face {
+  font-family: 'Raleway';
+  src: url('./assets/Raleway/Raleway-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Raleway';
+  src: url('./assets/Raleway/Raleway-Italic-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
 /* Design System Configuration */
 @theme {
+  /* Font Family */
+  --font-sans: 'Raleway', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
   /* Primary Color Palette - Deep Purple (#4c4176) */
   --color-primary-50: #f5f3f7;
   --color-primary-100: #ebe7ef;
