@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Button, Drawer, TextInput, Label, Checkbox, Spinner } from 'flowbite-react';
+import { Button, Drawer, TextInput, Label, Checkbox, Spinner, Select } from 'flowbite-react';
 import type { EntityDefinition, FieldDefinition } from '../types/entity.types';
 import type { EntityRecord } from '../services/entities.api';
 
@@ -98,9 +98,41 @@ const EntityRecordForm: React.FC<EntityRecordFormProps> = ({
                             id={field.name}
                             type="date"
                             value={value ? new Date(value).toISOString().split('T')[0] : ''}
-                            onChange={(e) => handleInputChange(field.name, e.target.value)}
+                            onChange={(e) => {
+                                // Convert date string to ISO datetime format for backend
+                                const dateValue = e.target.value;
+                                if (dateValue) {
+                                    // Create a date object at midnight UTC
+                                    const isoDateTime = new Date(dateValue + 'T00:00:00.000Z').toISOString();
+                                    handleInputChange(field.name, isoDateTime);
+                                } else {
+                                    handleInputChange(field.name, '');
+                                }
+                            }}
                             required={field.required}
                         />
+                    </div>
+                );
+
+            case 'dropdown':
+                return (
+                    <div key={field.name} className="mb-4">
+                        <Label htmlFor={field.name}>
+                            {fieldLabel} {field.required && <span className="text-red-500">*</span>}
+                        </Label>
+                        <Select
+                            id={field.name}
+                            value={value}
+                            onChange={(e) => handleInputChange(field.name, e.target.value)}
+                            required={field.required}
+                        >
+                            <option value="">Select an option</option>
+                            {field.options?.map((option) => (
+                                <option key={option.value} value={option.value}>
+                                    {option.label}
+                                </option>
+                            ))}
+                        </Select>
                     </div>
                 );
 

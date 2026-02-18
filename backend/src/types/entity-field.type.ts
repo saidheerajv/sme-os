@@ -5,6 +5,12 @@ export enum FieldType {
   EMAIL = 'email',
   DATE = 'date',
   URL = 'url',
+  DROPDOWN = 'dropdown',
+}
+
+export interface DropdownOption {
+  label: string;
+  value: string;
 }
 
 export interface FieldDefinition {
@@ -21,6 +27,9 @@ export interface FieldDefinition {
   // Number constraints
   min?: number;
   max?: number;
+  
+  // Dropdown options
+  options?: DropdownOption[];
   
   // Default value
   defaultValue?: any;

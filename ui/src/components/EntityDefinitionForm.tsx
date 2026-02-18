@@ -8,7 +8,7 @@ import {
   Alert,
 } from 'flowbite-react';
 import { FaPlus, FaTrash, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import type { EntityDefinition, FieldDefinition } from '../types/entity.types';
+import type { EntityDefinition, FieldDefinition, DropdownOption } from '../types/entity.types';
 import { FieldType } from '../types/entity.types';
 
 interface Props {
@@ -113,6 +113,21 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
           newErrors[`${fieldKey}-max`] = 'Maximum value must be greater than minimum value';
         }
       }
+
+      if (field.type === FieldType.DROPDOWN) {
+        if (!field.options || field.options.length === 0) {
+          newErrors[`${fieldKey}-options`] = 'Dropdown must have at least one option';
+        } else {
+          field.options.forEach((opt, idx) => {
+            if (!opt.label.trim()) {
+              newErrors[`${fieldKey}-option-${idx}-label`] = 'Option label is required';
+            }
+            if (!opt.value.trim()) {
+              newErrors[`${fieldKey}-option-${idx}-value`] = 'Option value is required';
+            }
+          });
+        }
+      }
     });
 
     setErrors(newErrors);
@@ -149,6 +164,9 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
         if (field.min !== undefined) cleanField.min = field.min;
         if (field.max !== undefined) cleanField.max = field.max;
         if (field.defaultValue !== undefined && field.defaultValue !== '') cleanField.defaultValue = field.defaultValue;
+        if (field.type === FieldType.DROPDOWN && field.options && field.options.length > 0) {
+          cleanField.options = field.options.map(opt => ({ label: opt.label.trim(), value: opt.value.trim() }));
+        }
 
         return cleanField;
       }),
@@ -164,7 +182,32 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
     { value: FieldType.EMAIL, label: 'Email' },
     { value: FieldType.DATE, label: 'Date' },
     { value: FieldType.URL, label: 'URL' },
+    { value: FieldType.DROPDOWN, label: 'Dropdown' },
   ];
+
+  const addDropdownOption = (fieldId: string) => {
+    const field = fields.find(f => f.id === fieldId);
+    if (!field) return;
+    const newOption: DropdownOption = { label: '', value: '' };
+    const currentOptions = field.options || [];
+    updateField(fieldId, { options: [...currentOptions, newOption] });
+  };
+
+  const updateDropdownOption = (fieldId: string, optionIndex: number, updates: Partial<DropdownOption>) => {
+    const field = fields.find(f => f.id === fieldId);
+    if (!field || !field.options) return;
+    const newOptions = field.options.map((opt, idx) =>
+      idx === optionIndex ? { ...opt, ...updates } : opt
+    );
+    updateField(fieldId, { options: newOptions });
+  };
+
+  const removeDropdownOption = (fieldId: string, optionIndex: number) => {
+    const field = fields.find(f => f.id === fieldId);
+    if (!field || !field.options) return;
+    const newOptions = field.options.filter((_, idx) => idx !== optionIndex);
+    updateField(fieldId, { options: newOptions });
+  };
 
   const renderFieldConstraints = (field: FieldFormData) => {
     if (!field.showAdvanced) return null;
@@ -236,6 +279,58 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
             onChange={e => updateField(field.id, { defaultValue: e.target.value || undefined })}
           />
         </div>
+      </div>
+    );
+  };
+
+  const renderDropdownOptions = (field: FieldFormData) => {
+    if (field.type !== FieldType.DROPDOWN) return null;
+    const fieldKey = `field-${field.id}`;
+    return (
+      <div className="mt-3 p-3 bg-yellow-50 rounded border border-yellow-200">
+        <div className="text-sm font-semibold mb-2">Dropdown Options</div>
+        {errors[`${fieldKey}-options`] && (
+          <div className="text-red-600 text-xs mb-2">{errors[`${fieldKey}-options`]}</div>
+        )}
+        {(field.options || []).map((option, idx) => (
+          <div key={idx} className="flex gap-2 mb-2 items-start">
+            <div className="flex-1">
+              <input
+                type="text"
+                className={`border rounded px-2 py-1 w-full ${errors[`${fieldKey}-option-${idx}-label`] ? 'border-red-500' : ''}`}
+                placeholder="Label"
+                value={option.label}
+                onChange={e => updateDropdownOption(field.id, idx, { label: e.target.value })}
+              />
+              {errors[`${fieldKey}-option-${idx}-label`] && (
+                <div className="text-red-600 text-xs mt-1">{errors[`${fieldKey}-option-${idx}-label`]}</div>
+              )}
+            </div>
+            <div className="flex-1">
+              <input
+                type="text"
+                className={`border rounded px-2 py-1 w-full ${errors[`${fieldKey}-option-${idx}-value`] ? 'border-red-500' : ''}`}
+                placeholder="Value"
+                value={option.value}
+                onChange={e => updateDropdownOption(field.id, idx, { value: e.target.value })}
+              />
+              {errors[`${fieldKey}-option-${idx}-value`] && (
+                <div className="text-red-600 text-xs mt-1">{errors[`${fieldKey}-option-${idx}-value`]}</div>
+              )}
+            </div>
+            <Button
+              size="xs"
+              color="failure"
+              onClick={() => removeDropdownOption(field.id, idx)}
+              className="flex items-center"
+            >
+              <FaTrash />
+            </Button>
+          </div>
+        ))}
+        <Button size="xs" color="light" onClick={() => addDropdownOption(field.id)} className="flex items-center gap-1">
+          <FaPlus /> Add Option
+        </Button>
       </div>
     );
   };
@@ -376,6 +471,7 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
               </div>
             </div>
 
+            {renderDropdownOptions(field)}
             {renderFieldConstraints(field)}
           </div>
         </Card>
@@ -386,7 +482,6 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
       </Button>
 
       {/* Form Actions */}
-      <hr className="my-4" />
       <div className="flex gap-2 justify-end">
         <Button color="light" onClick={onCancel}>
           Cancel

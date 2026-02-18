@@ -5,6 +5,7 @@ export const FieldType = {
   EMAIL: 'email',
   DATE: 'date',
   URL: 'url',
+  DROPDOWN: 'dropdown',
 } as const;
 
 export type FieldType = typeof FieldType[keyof typeof FieldType];
@@ -20,6 +21,11 @@ export interface SearchFieldConfig {
   operator:string
 
 }
+export interface DropdownOption {
+  label: string;
+  value: string;
+}
+
 export interface FieldDefinition {
   name: string;
   type: FieldType;
@@ -39,6 +45,9 @@ export interface FieldDefinition {
   // Number constraints
   min?: number;
   max?: number;
+  
+  // Dropdown options
+  options?: DropdownOption[];
   
   // Default value
   defaultValue?: any;

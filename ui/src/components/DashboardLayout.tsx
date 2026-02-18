@@ -82,10 +82,7 @@ const DashboardLayout: React.FC = () => {
                     `}
                 >
                     <div className="h-full px-3 py-4 overflow-y-auto">
-                        {/* Organization Selector for Mobile */}
-                        <div className="mb-4 pb-4 border-b border-gray-200 md:hidden">
-                            <OrganizationSelector />
-                        </div>
+                        
 
                         <ul className="space-y-2 font-medium">
                             {navItems.map((item) => {
@@ -119,7 +116,7 @@ const DashboardLayout: React.FC = () => {
                             <>
                                 <hr className="my-4 border-gray-200" />
                                 <div className="px-3 mb-2 text-xs font-semibold text-gray-500 uppercase">
-                                    Content
+                                    Modules
                                 </div>
                                 <ul className="space-y-2 font-medium">
                                     {entities.map((entity) => {

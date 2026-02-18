@@ -27,9 +27,9 @@ const DashboardHome: React.FC = () => {
         <div className="flex-1 min-w-[300px]">
           <Card>
             <h3 className="text-lg font-semibold mb-2">Entity Definitions</h3>
-            <p className="text-sm text-gray-500">Create and manage your content entity definitions</p>
+            <p className="text-sm text-gray-500">Create and manage your Modules</p>
             <Button color="light" className="mt-3 w-full" onClick={() => navigate('/dashboard/entity-definitions')}>
-              Manage Entities
+              Manage Modules
             </Button>
           </Card>
         </div>
@@ -78,7 +78,7 @@ const DashboardHome: React.FC = () => {
               <p className="text-base font-medium">{currentOrganization.name}</p>
             </div>
             <div className="flex-1 min-w-[200px]">
-              <p className="text-sm text-gray-500">Organization Slug</p>
+              <p className="text-sm text-gray-500">Organization Id</p>
               <p className="text-base">{currentOrganization.slug}</p>
             </div>
             <div className="flex-1 min-w-[200px]">
