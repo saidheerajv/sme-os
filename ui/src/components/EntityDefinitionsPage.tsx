@@ -109,7 +109,7 @@ const EntityDefinitionsPage: React.FC = () => {
       <div className="flex items-center mb-6">
 
         <h1 className="text-3xl font-bold grow">Entity Definitions</h1>
-        <Button color="blue" onClick={handleCreateEntity} size="sm">
+        <Button color="primary" onClick={handleCreateEntity} size="sm">
           <HiPlus className="w-5 h-5 mr-1" /> Create Entity
         </Button>
       </div>
@@ -128,7 +128,7 @@ const EntityDefinitionsPage: React.FC = () => {
           <HiCode className="mx-auto mb-4 text-gray-400" style={{ fontSize: 48 }} />
           <h2 className="text-lg text-gray-500 mb-2">No Entity Definitions Found</h2>
           <p className="text-gray-400 mb-4">Create your first entity definition to get started with dynamic content management.</p>
-          <Button color="blue" onClick={handleCreateEntity}>
+          <Button color="primary" onClick={handleCreateEntity}>
             <HiPlus className="w-5 h-5 mr-1" /> Create Your First Entity
           </Button>
         </Card>

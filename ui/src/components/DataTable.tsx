@@ -51,7 +51,7 @@ const DataTable: React.FC<DataTableProps> = ({ data, schema, onEdit, onDelete })
         cell: ({ row }) => (
           <div className="flex gap-2">
             {onEdit && (
-              <Button size="xs" color="blue" onClick={() => onEdit(row.original)}>
+              <Button size="xs" color="primary" onClick={() => onEdit(row.original)}>
                 Edit
               </Button>
             )}

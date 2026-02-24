@@ -13,7 +13,7 @@ import UsersPageWrapper from './components/UsersPageWrapper';
 import ProtectedRoute from './components/ProtectedRoute';
 import LoadingScreen from './components/LoadingScreen';
 import ErrorBoundary from './components/ErrorBoundary';
-// import { customTheme } from './theme/flowbite-theme';
+import { customTheme } from './theme/flowbite-theme';
 import './App.css';
 
 const AppContent: React.FC = () => {
@@ -54,7 +54,7 @@ const AppContent: React.FC = () => {
 
 function App() {
   return (
-    <ThemeProvider>
+    <ThemeProvider theme={customTheme}>
       <ErrorBoundary>
         <AuthProvider>
           <Router>

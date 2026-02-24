@@ -9,7 +9,7 @@ export const setAccessTokenGetter = (getter: any) => {
 };
 
 const api: AxiosInstance = axios.create({
-  baseURL: window.location.href.includes('localhost:5173') ? '/api' : (import.meta.env.VITE_API_BASE_URL || 'https://stage.b2bees.com'),
+  baseURL: window.location.href.includes('localhost:5173') ? '/api' : '',
   timeout: 20000 // 20 seconds
 });
 
@@ -20,10 +20,6 @@ api.interceptors.request.use(config => {
 
   if (config.url?.includes('{version}')) {
     config.url = config.url.replace('{version}', '1.0');
-  }
-
-  if (config.url?.includes('portal/')) {
-    config.url = config.url.replace('portal/', '');
   }
 
   if (token) {

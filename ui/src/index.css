@@ -23,31 +23,36 @@
 @theme {
   /* Font Family */
   --font-sans: 'Raleway', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
-  /* Primary Color Palette - Deep Purple (#4c4176) */
-  --color-primary-50: #f5f3f7;
-  --color-primary-100: #ebe7ef;
-  --color-primary-200: #d7cedf;
-  --color-primary-300: #b8a8c7;
-  --color-primary-400: #957da9;
-  --color-primary-500: #795f8f;
-  --color-primary-600: #4c4176;
-  --color-primary-700: #3d345e;
-  --color-primary-800: #342c4f;
-  --color-primary-900: #2d2743;
-  --color-primary-950: #1a162a;
+  /* Primary Color Palette - Navy Blue (#073679) */
+  --color-primary-50: #f0f4fb;
+  --color-primary-100: #e0e9f6;
+  --color-primary-200: #c1d4ed;
+  --color-primary-300: #92b1de;
+  --color-primary-400: #5f8bcc;
+  --color-primary-500: #3c6bb7;
+  --color-primary-600: #073679;
+  --color-primary-700: #062e64;
+  --color-primary-800: #0a2651;
+  --color-primary-900: #0c2143;
+  --color-primary-950: #08152c;
 
-  /* Secondary Color Palette - Slate Gray (#4C4959) */
-  --color-secondary-50: #f6f6f7;
-  --color-secondary-100: #ededee;
-  --color-secondary-200: #d7d7da;
-  --color-secondary-300: #b5b5bc;
-  --color-secondary-400: #8d8d98;
-  --color-secondary-500: #71717d;
-  --color-secondary-600: #4c4959;
-  --color-secondary-700: #3e3d49;
-  --color-secondary-800: #35343d;
-  --color-secondary-900: #2e2e35;
-  --color-secondary-950: #1a1a1f;
+  /* Secondary Color Palette - Navy Blue (#073679) */
+  --color-secondary-50: #f0f4fb;
+  --color-secondary-100: #e0e9f6;
+  --color-secondary-200: #c1d4ed;
+  --color-secondary-300: #92b1de;
+  --color-secondary-400: #5f8bcc;
+  --color-secondary-500: #3c6bb7;
+  --color-secondary-600: #073679;
+  --color-secondary-700: #062e64;
+  --color-secondary-800: #0a2651;
+  --color-secondary-900: #0c2143;
+  --color-secondary-950: #08152c;
+
+  /* Text Colors */
+  --color-text-primary: #222529;
+  --color-text-secondary: #87888a;
+  --color-text-disabled: #87888a;
 
   /* Border Radius */
   --radius-sm: 0.25rem;
@@ -69,6 +74,8 @@
 
 /* 
   Design System Usage Guide:
+  
+  Current primary color: #073679 (Navy Blue)
   
   To change the primary color:
   - Update the --color-primary-* variables above

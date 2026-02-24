@@ -142,7 +142,7 @@ const EntityContentPage: React.FC = () => {
     return (
         <div className="max-w-7xl mx-auto mt-8 mb-8 px-4">
             <div className="flex justify-between items-center mb-6">
-                <h1 className="text-3xl font-bold capitalize">{entityName} Content</h1>
+                <h1 className="text-xl font-semibold capitalize">{entityName}</h1>
                 <Button onClick={handleCreate}>
                     <HiPlus className="mr-2 h-5 w-5" />
                     Add New

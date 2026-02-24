@@ -93,7 +93,7 @@ const AuthCard: React.FC = () => {
                 className="mt-1"
               />
             </div>
-            <Button type="submit" color="blue" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? <Spinner size="sm" /> : 'Sign In'}
             </Button>
           </form>
@@ -158,7 +158,7 @@ const AuthCard: React.FC = () => {
                 className="mt-1"
               />
             </div>
-            <Button type="submit" color="blue" className="w-full" disabled={isLoading}>
+            <Button type="submit" color="primary" className="w-full" disabled={isLoading}>
               {isLoading ? <Spinner size="sm" /> : 'Sign Up'}
             </Button>
           </form>

@@ -113,7 +113,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     try {
       const response = await axios.post('/auth/login', {
         email,
-        password,
+        password
       });
       
       const { user, accessToken } = response.data;

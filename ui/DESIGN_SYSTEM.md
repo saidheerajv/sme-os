@@ -22,20 +22,20 @@ To change the primary color:
 2. Find the `--color-primary-*` variables in the `@theme` section
 3. Replace the values with your desired color palette
 
-**Example: Change to Purple**
+**Current Color: Blue (#4c82b8)**
 ```css
 @theme {
-  --color-primary-50: #faf5ff;
-  --color-primary-100: #f3e8ff;
-  --color-primary-200: #e9d5ff;
-  --color-primary-300: #d8b4fe;
-  --color-primary-400: #c084fc;
-  --color-primary-500: #a855f7;
-  --color-primary-600: #9333ea;
-  --color-primary-700: #7e22ce;
-  --color-primary-800: #6b21a8;
-  --color-primary-900: #581c87;
-  --color-primary-950: #3b0764;
+  --color-primary-50: #f0f5fa;
+  --color-primary-100: #e0ebf5;
+  --color-primary-200: #c1d7eb;
+  --color-primary-300: #a0c1df;
+  --color-primary-400: #7aa9d1;
+  --color-primary-500: #5c91c3;
+  --color-primary-600: #4c82b8;
+  --color-primary-700: #3d6894;
+  --color-primary-800: #345575;
+  --color-primary-900: #2d4860;
+  --color-primary-950: #1e2f40;
 }
 ```
 
@@ -54,20 +54,36 @@ The secondary color is available for:
 
 To change the secondary color, update the `--color-secondary-*` variables in the same way.
 
-**Example: Change to Teal**
+**Current Color: Blue (#4c82b8) - Same as Primary**
 ```css
 @theme {
-  --color-secondary-50: #f0fdfa;
-  --color-secondary-100: #ccfbf1;
-  --color-secondary-200: #99f6e4;
-  --color-secondary-300: #5eead4;
-  --color-secondary-400: #2dd4bf;
-  --color-secondary-500: #14b8a6;
-  --color-secondary-600: #0d9488;
-  --color-secondary-700: #0f766e;
-  --color-secondary-800: #115e59;
-  --color-secondary-900: #134e4a;
-  --color-secondary-950: #042f2e;
+  --color-secondary-50: #f0f5fa;
+  --color-secondary-100: #e0ebf5;
+  --color-secondary-200: #c1d7eb;
+  --color-secondary-300: #a0c1df;
+  --color-secondary-400: #7aa9d1;
+  --color-secondary-500: #5c91c3;
+  --color-secondary-600: #4c82b8;
+  --color-secondary-700: #3d6894;
+  --color-secondary-800: #345575;
+  --color-secondary-900: #2d4860;
+  --color-secondary-950: #1e2f40;
+}
+```
+
+### Text Colors
+
+The design system includes specific text colors for consistency:
+
+- **Primary Text**: `#222529` - Used for main content and headings
+- **Secondary Text**: `#87888a` - Used for supporting text and labels
+- **Disabled Text**: `#87888a` - Used for disabled states
+
+```css
+@theme {
+  --color-text-primary: #222529;
+  --color-text-secondary: #87888a;
+  --color-text-disabled: #87888a;
 }
 ```
 
@@ -152,13 +168,11 @@ Once you've configured your primary and secondary colors, use these classes:
 
 ## Quick Color Schemes
 
-### Professional Blue (Default)
-Already configured in [src/index.css](src/index.css)
-
-### Modern Purple
+### Professional Blue (#4c82b8) (Current)
+Currently configured in [src/index.css](src/index.css)
 ```css
---color-primary-500: #a855f7;
---color-primary-600: #9333ea;
+--color-primary-500: #5c91c3;
+--color-primary-600: #4c82b8;
 ```
 
 ### Corporate Navy
