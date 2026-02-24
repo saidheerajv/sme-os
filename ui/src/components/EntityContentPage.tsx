@@ -41,7 +41,7 @@ const EntityContentPage: React.FC = () => {
                     ...item.data
                 })));
             } catch (err: any) {
-                setError(err.response?.data?.message || 'Failed to load entity data');
+                setError(err.response?.data?.message || 'Failed to load module data');
             } finally {
                 setLoading(false);
             }
@@ -125,7 +125,7 @@ const EntityContentPage: React.FC = () => {
         return (
             <div className="max-w-6xl mx-auto mt-8 mb-8">
                 <Alert color="warning">
-                    <span className="font-medium">Not Found!</span> Entity schema not found.
+                    <span className="font-medium">Not Found!</span> Module schema not found.
                 </Alert>
             </div>
         );

@@ -32,20 +32,60 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  // Initialize user from localStorage
+  const [user, setUser] = useState<User | null>(() => {
+    const storedUser = localStorage.getItem('user');
+    return storedUser ? JSON.parse(storedUser) : null;
+  });
   const [currentOrganization, setCurrentOrganizationState] = useState<Organization | null>(null);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  // Configure axios interceptor to include auth token and organization header
+  // Logout function - defined early for use in interceptor
+  const performLogout = (): void => {
+    localStorage.removeItem('accessToken');
+    localStorage.removeItem('currentOrganizationId');
+    localStorage.removeItem('user');
+    delete axios.defaults.headers.common['Authorization'];
+    delete axios.defaults.headers.common['x-organization-id'];
+    setUser(null);
+    setCurrentOrganizationState(null);
+    setOrganizations([]);
+    setError(null);
+  };
+
+  // Setup axios interceptor for 401 handling
+  useEffect(() => {
+    const interceptorId = axios.interceptors.response.use(
+      (response) => response,
+      (error) => {
+        if (error.response?.status === 401) {
+          performLogout();
+          // Redirect to login page
+          window.location.href = '/auth';
+        }
+        return Promise.reject(error);
+      }
+    );
+
+    return () => {
+      axios.interceptors.response.eject(interceptorId);
+    };
+  }, []);
+
+  // Configure axios with auth token and load organizations on mount
   useEffect(() => {
     const token = localStorage.getItem('accessToken');
-    if (token) {
+    const storedUser = localStorage.getItem('user');
+    
+    if (token && storedUser) {
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
-      // Load user session and organizations
+      // Load organizations (user is already restored from localStorage state initializer)
       loadUserSession();
+    } else if (token && !storedUser) {
+      // Token exists but no user - invalid state, clear everything
+      performLogout();
     }
   }, []);
 
@@ -118,8 +158,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       const { user, accessToken } = response.data;
       
-      // Store token in localStorage
+      // Store token and user in localStorage
       localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('user', JSON.stringify(user));
       
       // Set authorization header for future requests
       axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
@@ -151,8 +192,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       
       const { user, accessToken, defaultOrganization } = response.data;
       
-      // Store token in localStorage
+      // Store token and user in localStorage
       localStorage.setItem('accessToken', accessToken);
+      localStorage.setItem('user', JSON.stringify(user));
       
       // Set authorization header for future requests
       axios.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`;
@@ -174,18 +216,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = (): void => {
-    // Remove token from localStorage
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('currentOrganizationId');
-    
-    // Remove authorization header
-    delete axios.defaults.headers.common['Authorization'];
-    delete axios.defaults.headers.common['x-organization-id'];
-    
-    setUser(null);
-    setCurrentOrganizationState(null);
-    setOrganizations([]);
-    setError(null);
+    performLogout();
   };
 
   const value = {

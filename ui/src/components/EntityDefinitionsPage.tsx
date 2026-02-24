@@ -29,7 +29,7 @@ const EntityDefinitionsPage: React.FC = () => {
       setEntities(data);
     } catch (error) {
       console.error('Failed to load entities:', error);
-      showSnackbar('Failed to load entity definitions', 'error');
+      showSnackbar('Failed to load module definitions', 'error');
     } finally {
       setLoading(false);
     }
@@ -54,10 +54,10 @@ const EntityDefinitionsPage: React.FC = () => {
     try {
       await entityDefinitionsApi.delete(entityToDelete.name);
       setEntities(entities.filter(e => e.id !== entityToDelete.id));
-      showSnackbar('Entity definition deleted successfully', 'success');
+      showSnackbar('Module definition deleted successfully', 'success');
     } catch (error) {
       console.error('Failed to delete entity:', error);
-      showSnackbar('Failed to delete entity definition', 'error');
+      showSnackbar('Failed to delete module definition', 'error');
     } finally {
       setIsDeleteConfirmOpen(false);
       setEntityToDelete(null);
@@ -108,17 +108,17 @@ const EntityDefinitionsPage: React.FC = () => {
       {/* Header */}
       <div className="flex items-center mb-6">
 
-        <h1 className="text-3xl font-bold grow">Entity Definitions</h1>
+        <h1 className="text-3xl font-bold grow">Module Definitions</h1>
         <Button color="primary" onClick={handleCreateEntity} size="sm">
-          <HiPlus className="w-5 h-5 mr-1" /> Create Entity
+          <HiPlus className="w-5 h-5 mr-1" /> Create Module
         </Button>
       </div>
 
       {/* Description */}
       <Card className="mb-6">
-        <h2 className="text-xl font-semibold mb-2">Dynamic Entity Management</h2>
+        <h2 className="text-xl font-semibold mb-2">Dynamic Module Management</h2>
         <p className="text-gray-600 text-sm">
-          Create and manage dynamic entity definitions that will automatically generate CRUD APIs. Each entity can have custom fields with validation rules and constraints.
+          Create and manage dynamic module definitions that will automatically generate CRUD APIs. Each module can have custom fields with validation rules and constraints.
         </p>
       </Card>
 
@@ -126,10 +126,10 @@ const EntityDefinitionsPage: React.FC = () => {
       {entities.length === 0 ? (
         <Card className="p-8 text-center">
           <HiCode className="mx-auto mb-4 text-gray-400" style={{ fontSize: 48 }} />
-          <h2 className="text-lg text-gray-500 mb-2">No Entity Definitions Found</h2>
-          <p className="text-gray-400 mb-4">Create your first entity definition to get started with dynamic content management.</p>
+          <h2 className="text-lg text-gray-500 mb-2">No Module Definitions Found</h2>
+          <p className="text-gray-400 mb-4">Create your first module definition to get started with dynamic content management.</p>
           <Button color="primary" onClick={handleCreateEntity}>
-            <HiPlus className="w-5 h-5 mr-1" /> Create Your First Entity
+            <HiPlus className="w-5 h-5 mr-1" /> Create Your First Module
           </Button>
         </Card>
       ) : (
@@ -176,8 +176,8 @@ const EntityDefinitionsPage: React.FC = () => {
         <div className="p-4">
           <h3 className="text-lg font-semibold mb-4">Confirm Delete</h3>
           <p className="mb-4">
-            Are you sure you want to delete the entity definition "{entityToDelete?.name}"?
-            This action cannot be undone and will also delete all data instances of this entity.
+            Are you sure you want to delete the module definition "{entityToDelete?.name}"?
+            This action cannot be undone and will also delete all data instances of this module.
           </p>
           <div className="flex gap-2 justify-end">
             <Button color="light" onClick={() => setIsDeleteConfirmOpen(false)}>Cancel</Button>

@@ -1,16 +1,19 @@
 import React from 'react';
 import { Navbar, Button } from 'flowbite-react';
 import { Link, useNavigate } from 'react-router-dom';
-import { FaTachometerAlt, FaUser, FaSignOutAlt, FaBars } from 'react-icons/fa';
+import { FaSignOutAlt, FaBars } from 'react-icons/fa';
+// import { FaTachometerAlt, FaUser } from 'react-icons/fa';
 import { useAuth } from '../contexts/AuthContext';
-import OrganizationSelector from './OrganizationSelector';
+// import OrganizationSelector from './OrganizationSelector';
 
 interface HeaderProps {
     onToggleSidebar: () => void;
 }
 
 const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
-    const { user, logout } = useAuth();
+    const { logout, currentOrganization } = useAuth();
+    // const { user } = useAuth();
+    
     const navigate = useNavigate();
 
     const handleLogout = () => {
@@ -31,7 +34,9 @@ const Header: React.FC<HeaderProps> = ({ onToggleSidebar }) => {
                 </Button>
                 <Link to="/dashboard" className="flex items-center">
                     {/* <FaTachometerAlt className="mr-3 text-xl" /> */}
-                    <span className="self-center whitespace-nowrap text-xl font-semibold">oorimi</span>
+                    <span className="self-center whitespace-nowrap text-xl font-semibold">
+                        {currentOrganization?.name || 'oorimi'}
+                    </span>
                 </Link>
             </div>
             <div className="flex items-center gap-4">

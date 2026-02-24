@@ -24,7 +24,7 @@ const EntityDefinitionFormPage: React.FC = () => {
       navigate('/dashboard/entity-definitions');
     } catch (error: any) {
       console.error('Failed to save entity:', error);
-      const errorMessage = error.response?.data?.message || `Failed to ${entityToEdit ? 'update' : 'create'} entity definition`;
+      const errorMessage = error.response?.data?.message || `Failed to ${entityToEdit ? 'update' : 'create'} module definition`;
       setError(errorMessage);
     }
   };
@@ -37,7 +37,7 @@ const EntityDefinitionFormPage: React.FC = () => {
     <div className="max-w-5xl mx-auto mt-8 mb-8">
       <Card className="p-6">
         <h1 className="text-2xl font-bold mb-6">
-          {entityToEdit ? 'Edit Entity Definition' : 'Create New Entity Definition'}
+          {entityToEdit ? 'Edit Module Definition' : 'Create New Module Definition'}
         </h1>
         
         {error && (

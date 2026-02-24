@@ -71,9 +71,9 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
 
     // Validate entity name
     if (!entityName.trim()) {
-      newErrors.entityName = 'Entity name is required';
+      newErrors.entityName = 'Module name is required';
     } else if (!/^[A-Za-z][A-Za-z0-9]*$/.test(entityName.trim())) {
-      newErrors.entityName = 'Entity name must start with a letter and contain only letters and numbers';
+      newErrors.entityName = 'Module name must start with a letter and contain only letters and numbers';
     }
 
     // Validate fields
@@ -487,7 +487,7 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
           Cancel
         </Button>
         <Button type="submit" color="success">
-          {initialData ? 'Update Entity' : 'Create Entity'}
+          {initialData ? 'Update Module' : 'Create Module'}
         </Button>
       </div>
     </form>

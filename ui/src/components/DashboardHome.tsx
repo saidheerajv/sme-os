@@ -26,7 +26,7 @@ const DashboardHome: React.FC = () => {
       <div className="flex flex-wrap gap-4 mb-6">
         <div className="flex-1 min-w-[300px]">
           <Card>
-            <h3 className="text-lg font-semibold mb-2">Entity Definitions</h3>
+            <h3 className="text-lg font-semibold mb-2">Module Definitions</h3>
             <p className="text-sm text-gray-500">Create and manage your Modules</p>
             <Button color="light" className="mt-3 w-full" onClick={() => navigate('/dashboard/entity-definitions')}>
               Manage Modules
