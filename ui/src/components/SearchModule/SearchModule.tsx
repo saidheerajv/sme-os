@@ -115,6 +115,24 @@ const SearchModule: React.FC<SearchModuleProps> = ({ fields, onSearch }) => {
                   placeholder={field.displayName || field.name}
                   sizing="sm"
                 />
+              ) : field.type === 'datetime' ? (
+                <TextInput
+                  id={`search-${field.name}`}
+                  type="datetime-local"
+                  value={currentValue}
+                  onChange={(e) => handleFieldChange(field.name, e.target.value)}
+                  placeholder={field.displayName || field.name}
+                  sizing="sm"
+                />
+              ) : field.type === 'time' ? (
+                <TextInput
+                  id={`search-${field.name}`}
+                  type="time"
+                  value={currentValue}
+                  onChange={(e) => handleFieldChange(field.name, e.target.value)}
+                  placeholder={field.displayName || field.name}
+                  sizing="sm"
+                />
               ) : field.type === 'number' ? (
                 <TextInput
                   id={`search-${field.name}`}

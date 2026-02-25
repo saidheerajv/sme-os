@@ -39,6 +39,12 @@ const DataTable: React.FC<DataTableProps> = ({ data, schema, onEdit, onDelete })
         if (field.type === 'date' && value) {
           return new Date(value as string).toLocaleDateString();
         }
+        if (field.type === 'datetime' && value) {
+          return new Date(value as string).toLocaleString();
+        }
+        if (field.type === 'time' && value) {
+          return value?.toString() || '';
+        }
         return value?.toString() || '';
       },
     }));

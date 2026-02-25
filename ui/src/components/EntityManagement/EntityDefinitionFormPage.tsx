@@ -34,11 +34,11 @@ const EntityDefinitionFormPage: React.FC = () => {
   };
 
   return (
-    <div className="max-w-5xl mx-auto mt-8 mb-8">
+    <div className="max-w-full">
       <Card className="p-6">
-        <h1 className="text-2xl font-bold mb-6">
+        <h2 className="text-2xl font-bold mb-2">
           {entityToEdit ? 'Edit Module Definition' : 'Create New Module Definition'}
-        </h1>
+        </h2>
         
         {error && (
           <Alert color="failure" className="mb-4" onDismiss={() => setError(null)}>

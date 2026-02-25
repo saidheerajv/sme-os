@@ -4,6 +4,8 @@ export enum FieldType {
   BOOLEAN = 'boolean',
   EMAIL = 'email',
   DATE = 'date',
+  DATETIME = 'datetime',
+  TIME = 'time',
   URL = 'url',
   DROPDOWN = 'dropdown',
 }
@@ -19,6 +21,9 @@ export interface FieldDefinition {
   required: boolean;
   unique?: boolean;
   
+  // Display name for UI
+  displayName?: string;
+  
   // String constraints
   minLength?: number;
   maxLength?: number;
@@ -33,6 +38,15 @@ export interface FieldDefinition {
   
   // Default value
   defaultValue?: any;
+  
+  // Display configuration
+  showInDataTable?: boolean;
+  showInForm?: boolean;
+  allowUpdate?: boolean;
+  enableSearch?: boolean;
+  
+  // Form layout - span 1-4 columns (default: 2)
+  span?: 1 | 2 | 3 | 4;
 }
 
 export interface EntityDefinitionData {

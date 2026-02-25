@@ -346,6 +346,18 @@ export class FilterService {
         }
         break;
 
+      case FieldType.DATETIME:
+        if (!dateOps.includes(operator)) {
+          throw new BadRequestException(`Operator ${operator} not supported for datetime field: ${fieldName}`);
+        }
+        break;
+
+      case FieldType.TIME:
+        if (!stringOps.includes(operator)) {
+          throw new BadRequestException(`Operator ${operator} not supported for time field: ${fieldName}`);
+        }
+        break;
+
       default:
         throw new BadRequestException(`Unknown field type: ${fieldType} for field: ${fieldName}`);
     }

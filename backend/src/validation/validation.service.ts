@@ -38,6 +38,14 @@ export class ValidationService {
           fieldSchema = z.string().datetime().or(z.date());
           break;
 
+        case FieldType.DATETIME:
+          fieldSchema = z.string().datetime().or(z.date());
+          break;
+
+        case FieldType.TIME:
+          fieldSchema = z.string().regex(/^([01]\d|2[0-3]):([0-5]\d)(:[0-5]\d)?$/, 'Invalid time format (HH:mm or HH:mm:ss)');
+          break;
+
         case FieldType.URL:
           fieldSchema = z.string().url();
           break;

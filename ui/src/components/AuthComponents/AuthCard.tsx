@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Card, Button, Spinner, Alert, TextInput, Label } from 'flowbite-react';
+import { Card, Spinner, Alert, TextInput, Label, Button } from 'flowbite-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
@@ -9,10 +9,6 @@ const AuthCard: React.FC = () => {
   const [signupData, setSignupData] = useState({ email: '', password: '', name: '', organizationName: '' });
   const { login, signup, isLoading, error } = useAuth();
   const navigate = useNavigate();
-
-  const handleTabChange = (tabKey: 'login' | 'signup') => {
-    setTab(tabKey);
-  };
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -36,23 +32,42 @@ const AuthCard: React.FC = () => {
 
   return (
     <Card className="w-full max-w-md p-6">
-      <div className="flex mb-4 border-b">
-        <Button
-          color="light"
-          className={`flex-1 py-2 text-center font-semibold rounded-none ${tab === 'login' ? 'border-b-2 border-primary-600 text-primary-600' : 'text-gray-500'}`}
-          onClick={() => handleTabChange('login')}
-          type="button"
-        >
-          Login
-        </Button>
-        <Button
-          color="light"
-          className={`flex-1 py-2 text-center font-semibold rounded-none ${tab === 'signup' ? 'border-b-2 border-primary-600 text-primary-600' : 'text-gray-500'}`}
-          onClick={() => handleTabChange('signup')}
-          type="button"
-        >
-          Sign Up
-        </Button>
+      {/* Sliding Tab Selector */}
+      <div className="relative mb-6">
+        <div className="flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
+          {/* Sliding background indicator */}
+          <div
+            className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white dark:bg-gray-800 rounded-lg shadow-md transition-all duration-300 ease-out ${
+              tab === 'signup' ? 'translate-x-[calc(100%+4px)]' : 'translate-x-0'
+            }`}
+          />
+          
+          {/* Login Tab */}
+          <button
+            onClick={() => setTab('login')}
+            className={`relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-300 ${
+              tab === 'login'
+                ? 'text-primary-600 dark:text-primary-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+            }`}
+            type="button"
+          >
+            Sign In
+          </button>
+          
+          {/* Signup Tab */}
+          <button
+            onClick={() => setTab('signup')}
+            className={`relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-300 ${
+              tab === 'signup'
+                ? 'text-primary-600 dark:text-primary-400'
+                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+            }`}
+            type="button"
+          >
+            Sign Up
+          </button>
+        </div>
       </div>
 
       {error && (

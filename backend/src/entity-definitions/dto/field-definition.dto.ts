@@ -1,5 +1,14 @@
-import { IsString, IsBoolean, IsOptional, IsNumber, IsEnum } from 'class-validator';
-import { FieldType } from '../../types/entity-field.type';
+import { IsString, IsBoolean, IsOptional, IsNumber, IsEnum, IsArray, ValidateNested } from 'class-validator';
+import { Type } from 'class-transformer';
+import { FieldType, DropdownOption } from '../../types/entity-field.type';
+
+class DropdownOptionDto implements DropdownOption {
+  @IsString()
+  label: string;
+
+  @IsString()
+  value: string;
+}
 
 export class FieldDefinitionDto {
   @IsString()
@@ -14,6 +23,11 @@ export class FieldDefinitionDto {
   @IsOptional()
   @IsBoolean()
   unique?: boolean;
+
+  // Display name for UI
+  @IsOptional()
+  @IsString()
+  displayName?: string;
 
   // String constraints
   @IsOptional()
@@ -37,6 +51,13 @@ export class FieldDefinitionDto {
   @IsNumber()
   max?: number;
 
+  // Dropdown options
+  @IsOptional()
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => DropdownOptionDto)
+  options?: DropdownOptionDto[];
+
   // Default value
   @IsOptional()
   defaultValue?: any;
@@ -44,9 +65,22 @@ export class FieldDefinitionDto {
   // Display configuration
   @IsOptional()
   @IsBoolean()
-  displayInDataTable?: boolean;
+  showInDataTable?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  showInForm?: boolean;
+
+  @IsOptional()
+  @IsBoolean()
+  allowUpdate?: boolean;
 
   @IsOptional()
   @IsBoolean()
   enableSearch?: boolean;
+
+  // Form layout - span 1-4 columns
+  @IsOptional()
+  @IsNumber()
+  span?: number;
 }

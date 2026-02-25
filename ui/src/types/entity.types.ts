@@ -4,6 +4,8 @@ export const FieldType = {
   BOOLEAN: 'boolean',
   EMAIL: 'email',
   DATE: 'date',
+  DATETIME: 'datetime',
+  TIME: 'time',
   URL: 'url',
   DROPDOWN: 'dropdown',
 } as const;
@@ -51,8 +53,10 @@ export interface FieldDefinition {
   
   // Default value
   defaultValue?: any;
-  displayInDataTable?: boolean;
   enableSearch?: boolean;
+  
+  // Form layout - span 1-4 columns (default: 2)
+  span?: 1 | 2 | 3 | 4;
 }
 
 export interface EntityDefinition {
