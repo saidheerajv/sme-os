@@ -1,7 +1,7 @@
 import React from 'react';
 import { Alert } from 'flowbite-react';
 import UsersPage from './UsersPage';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 
 const UsersPageWrapper: React.FC = () => {
   const { currentOrganization } = useAuth();

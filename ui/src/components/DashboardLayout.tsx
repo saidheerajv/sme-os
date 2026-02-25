@@ -3,8 +3,8 @@ import { Outlet } from 'react-router-dom';
 import type { EntityDefinition } from '../types/entity.types';
 import { entityDefinitionsApi } from '../services/entityDefinitions.api';
 import { useAuth } from '../contexts/AuthContext';
-import Header from './Header';
-import SideMenu from './SideMenu';
+import Header from './LayoutComponents/Header';
+import SideMenu from './LayoutComponents/SideMenu';
 
 const DashboardLayout: React.FC = () => {
     const { currentOrganization } = useAuth();

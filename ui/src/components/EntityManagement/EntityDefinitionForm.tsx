@@ -8,8 +8,8 @@ import {
   Alert,
 } from 'flowbite-react';
 import { FaPlus, FaTrash, FaChevronDown, FaChevronUp } from 'react-icons/fa';
-import type { EntityDefinition, FieldDefinition, DropdownOption } from '../types/entity.types';
-import { FieldType } from '../types/entity.types';
+import type { EntityDefinition, FieldDefinition, DropdownOption } from '../../types/entity.types';
+import { FieldType } from '../../types/entity.types';
 
 interface Props {
   initialData?: EntityDefinition | null;

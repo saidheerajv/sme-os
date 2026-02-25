@@ -2,9 +2,9 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, Button, Badge, Modal, Alert } from 'flowbite-react';
 import { HiPlus, HiPencil, HiTrash, HiCode } from 'react-icons/hi';
-import { entityDefinitionsApi } from '../services/entityDefinitions.api';
-import type { EntityDefinition, FieldDefinition } from '../types/entity.types';
-import { FieldType } from '../types/entity.types';
+import { entityDefinitionsApi } from '../../services/entityDefinitions.api';
+import type { EntityDefinition, FieldDefinition } from '../../types/entity.types';
+import { FieldType } from '../../types/entity.types';
 
 const EntityDefinitionsPage: React.FC = () => {
   const navigate = useNavigate();

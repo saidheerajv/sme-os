@@ -3,7 +3,7 @@ import { Navbar, Button } from 'flowbite-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaSignOutAlt, FaBars } from 'react-icons/fa';
 // import { FaTachometerAlt, FaUser } from 'react-icons/fa';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 // import OrganizationSelector from './OrganizationSelector';
 
 interface HeaderProps {

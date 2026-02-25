@@ -3,16 +3,16 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-d
 import { ThemeProvider } from 'flowbite-react';
 import { AuthProvider, useAuth } from './contexts/AuthContext';
 import LandingPage from './components/LandingPage';
-import AuthPage from './components/AuthPage';
+import AuthPage from './components/AuthComponents/AuthPage';
 import DashboardLayout from './components/DashboardLayout';
 import DashboardHome from './components/DashboardHome';
 import EntityDefinitionsPage from './components/EntityDefinitionsPage';
-import EntityDefinitionFormPage from './components/EntityDefinitionFormPage';
+import EntityDefinitionFormPage from './components/EntityManagement/EntityDefinitionFormPage';
 import EntityContentPage from './components/EntityContentPage';
 import UsersPageWrapper from './components/UsersPageWrapper';
 import ProtectedRoute from './components/ProtectedRoute';
-import LoadingScreen from './components/LoadingScreen';
-import ErrorBoundary from './components/ErrorBoundary';
+import LoadingScreen from './components/UtilityComponents/LoadingScreen';
+import ErrorBoundary from './components/UtilityComponents/ErrorBoundary';
 import { customTheme } from './theme/flowbite-theme';
 import './App.css';
 

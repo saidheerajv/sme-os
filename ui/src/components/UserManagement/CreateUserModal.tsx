@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Button, Label, TextInput, Select, Alert } from 'flowbite-react';
 import { FaUserPlus } from 'react-icons/fa';
-import type { CreateUserDto } from '../types/organization.types';
+import type { CreateUserDto } from '../../types/organization.types';
 
 interface Props {
   isOpen: boolean;

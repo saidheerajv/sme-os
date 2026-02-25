@@ -2,8 +2,8 @@ import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, Alert } from 'flowbite-react';
 import EntityDefinitionForm from './EntityDefinitionForm';
-import { entityDefinitionsApi } from '../services/entityDefinitions.api';
-import type { EntityDefinition, FieldDefinition } from '../types/entity.types';
+import { entityDefinitionsApi } from '../../services/entityDefinitions.api';
+import type { EntityDefinition, FieldDefinition } from '../../types/entity.types';
 
 const EntityDefinitionFormPage: React.FC = () => {
   const navigate = useNavigate();

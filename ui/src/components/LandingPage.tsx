@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, Button } from 'flowbite-react';
-import AuthCard from './AuthCard';
+import AuthCard from './AuthComponents/AuthCard';
 import { 
   HiClipboardList, 
   HiUserGroup, 

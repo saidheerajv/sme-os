@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Card, Button, Badge, Alert, Spinner } from 'flowbite-react';
 import { FaUserPlus, FaTrash, FaUserShield, FaUser, FaCrown } from 'react-icons/fa';
-import { organizationsApi } from '../services/organizations.api';
+import { organizationsApi } from '../../services/organizations.api';
 import CreateUserModal from './CreateUserModal';
-import type { OrganizationMember, CreateUserDto } from '../types/organization.types';
+import type { OrganizationMember, CreateUserDto } from '../../types/organization.types';
 
 interface Props {
   organizationId: string;

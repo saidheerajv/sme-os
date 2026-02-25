@@ -5,9 +5,9 @@ import { entityDefinitionsApi } from '../services/entityDefinitions.api';
 import { entitiesApi, type EntityRecord } from '../services/entities.api';
 import type { EntityDefinition } from '../types/entity.types';
 import { HiPlus } from 'react-icons/hi';
-import DataTable from './DataTable';
+import DataTable from './EntityDisplayComponents/DataTable';
 import EntityRecordForm from './EntityRecordForm';
-import SearchModule from './SearchModule';
+import SearchModule from './SearchModule/SearchModule';
 
 const EntityContentPage: React.FC = () => {
 

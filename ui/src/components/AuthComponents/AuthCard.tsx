@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Card, Button, Spinner, Alert, TextInput, Label } from 'flowbite-react';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
 
 const AuthCard: React.FC = () => {

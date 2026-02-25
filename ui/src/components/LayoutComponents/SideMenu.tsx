@@ -1,7 +1,7 @@
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FaDatabase, FaUsers } from 'react-icons/fa';
-import type { EntityDefinition } from '../types/entity.types';
+import type { EntityDefinition } from '../../types/entity.types';
 
 interface SideMenuProps {
     isOpen: boolean;
