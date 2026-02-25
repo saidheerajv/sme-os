@@ -1,4 +1,4 @@
-import type { CustomFlowbiteTheme } from 'flowbite-react';
+import type { CustomFlowbiteTheme } from "flowbite-react/types";
 
 /**
  * Custom Flowbite Theme
@@ -21,11 +21,9 @@ export const customTheme: CustomFlowbiteTheme = {
       warning: 'bg-yellow-400 hover:bg-yellow-500 text-gray-900 focus:ring-4 focus:ring-yellow-300',
       info: 'bg-primary-500 hover:bg-primary-600 text-white focus:ring-4 focus:ring-primary-300',
     },
-    outline: {
-      color: {
-        primary: 'border border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white focus:ring-4 focus:ring-primary-300',
-        secondary: 'border border-secondary-600 text-secondary-600 hover:bg-secondary-600 hover:text-white focus:ring-4 focus:ring-secondary-300',
-      },
+    outlineColor: {
+      primary: 'border border-primary-600 text-primary-600 hover:bg-primary-600 hover:text-white focus:ring-4 focus:ring-primary-300',
+      secondary: 'border border-secondary-600 text-secondary-600 hover:bg-secondary-600 hover:text-white focus:ring-4 focus:ring-secondary-300',
     },
   },
   spinner: {
@@ -84,17 +82,13 @@ export const customTheme: CustomFlowbiteTheme = {
     },
   },
   checkbox: {
-    root: {
-      color: {
-        default: 'text-primary-600 focus:ring-primary-500',
-      },
+    color: {
+      default: 'text-primary-600 focus:ring-primary-500',
     },
   },
   radio: {
-    root: {
-      color: {
-        default: 'text-primary-600 focus:ring-primary-500',
-      },
+    color: {
+      default: 'text-primary-600 focus:ring-primary-500',
     },
   },
   toggleSwitch: {

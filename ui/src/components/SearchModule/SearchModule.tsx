@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Card, TextInput, Button, Select } from 'flowbite-react';
 import { HiX } from 'react-icons/hi';
 import debounce from 'lodash/debounce';
-import type { FieldDefinition } from '../types/entity.types';
+import type { FieldDefinition } from '../../types/entity.types';
 
 interface SearchModuleProps {
   fields: FieldDefinition[];
