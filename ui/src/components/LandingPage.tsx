@@ -19,29 +19,57 @@ const LandingPage: React.FC = () => {
 
   const templates = [
     {
-      icon: <HiClipboardList className="w-12 h-12 text-primary-600" />,
-      title: 'Order Maintenance',
+      icon: <HiClipboardList className="w-12 h-12 text-primary-500" />,
+      title: 'Order Management',
       description: 'Manage and track orders efficiently with real-time updates, status tracking, and customer management.'
     },
     {
-      icon: <HiUserGroup className="w-12 h-12 text-primary-600" />,
+      icon: <HiUserGroup className="w-12 h-12 text-primary-500" />,
       title: 'Attendance Tracking',
       description: 'Monitor employee attendance, track working hours, and generate comprehensive attendance reports.'
     },
     {
-      icon: <HiViewBoards className="w-12 h-12 text-primary-600" />,
+      icon: <HiViewBoards className="w-12 h-12 text-primary-500" />,
       title: 'Kanban Board',
       description: 'Visualize your workflow with drag-and-drop tasks, customizable columns, and real-time collaboration.'
     },
     {
-      icon: <HiUsers className="w-12 h-12 text-primary-600" />,
+      icon: <HiUsers className="w-12 h-12 text-primary-500" />,
       title: 'Visitor Management',
       description: 'Streamline visitor check-ins, maintain visitor logs, and enhance security with digital registration.'
     },
     {
-      icon: <HiKey className="w-12 h-12 text-primary-600" />,
+      icon: <HiKey className="w-12 h-12 text-primary-500" />,
       title: 'Valet Management',
       description: 'Efficiently manage valet services with vehicle tracking, ticket generation, and quick retrieval.'
+    },
+    {
+      icon: <HiClipboardList className="w-12 h-12 text-primary-500" />,
+      title: 'Task Management',
+      description: 'Efficiently manage tasks with assignment tracking, progress monitoring, and deadline management.'
+    }
+  ];
+
+  const pricingPlans = [
+    {
+      name: 'Basic',
+      price: '199 per month',
+      features: ['Upto 2 Modules', 'Upto 3 users', 'Email support']
+    },
+    {
+      name: 'Standard',
+      price: '399 per month',
+      features: ['Upto 5 modules', 'Upto 10 Users', 'Mobile and chat support']
+    },
+    {
+      name: 'Enterprise',
+      price: 'Contact sales',
+      features: [
+        'Unlimited modules',
+        'Custom Module development',
+        'Unlimited users',
+        'Mobile and chat support with dedicated Relationship manager'
+      ]
     }
   ];
 
@@ -56,13 +84,20 @@ const LandingPage: React.FC = () => {
             <div className="flex items-center">
               <h1 className="text-3xl font-bold text-primary-600">Oorimi</h1>
             </div>
-            <nav className="flex space-x-8">
+            <nav className="flex space-x-4">
               <Button
                 color="light"
                 onClick={() => scrollToSection('templates')}
-                className="text-gray-700 hover:text-primary-600 font-medium"
+                className="text-gray-700 hover:text-primary-600 font-medium cursor-pointer"
               >
                 Templates
+              </Button>
+              <Button
+                color="light"
+                onClick={() => scrollToSection('pricing')}
+                className="text-gray-700 hover:text-primary-600 font-medium cursor-pointer"
+              >
+                Pricing
               </Button>
             </nav>
           </div>
@@ -85,6 +120,7 @@ const LandingPage: React.FC = () => {
                 <Button
                   color="info"
                   size="lg"
+                  className='cursor-pointer'
                   onClick={() => scrollToSection('templates')}
                 >
                   Learn More
@@ -119,8 +155,39 @@ const LandingPage: React.FC = () => {
                     {template.title}
                   </h3>
                   <p className="text-gray-600 mb-4">{template.description}</p>
-                  <Button color="info" size="sm" className="mt-auto">
+                  <Button color="info" size="sm" className="mt-auto cursor-pointer">
                     Get Started
+                  </Button>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="py-16 px-4 sm:px-6 lg:px-8 bg-gray-50">
+        <div className="max-w-7xl mx-auto">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl font-bold text-gray-900 mb-4">Pricing</h2>
+            <p className="text-lg text-gray-600">
+              Choose the plan that fits your business needs
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-3 gap-8">
+            {pricingPlans.map((plan) => (
+              <Card key={plan.name} className="h-full">
+                <div className="flex flex-col h-full">
+                  <h3 className="text-2xl font-semibold text-gray-900 mb-2">{plan.name}</h3>
+                  <p className="text-primary-600 font-bold text-xl mb-4">{plan.price}</p>
+                  <ul className="space-y-2 text-gray-700 mb-6">
+                    {plan.features.map((feature) => (
+                      <li key={feature}>• {feature}</li>
+                    ))}
+                  </ul>
+                  <Button color="info" className="mt-auto cursor-pointer">
+                    {plan.name === 'Enterprise' ? 'Contact Sales' : 'Get Started'}
                   </Button>
                 </div>
               </Card>

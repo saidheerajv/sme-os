@@ -34,10 +34,10 @@ const AuthCard: React.FC = () => {
     <Card className="w-full max-w-md p-6">
       {/* Sliding Tab Selector */}
       <div className="relative mb-6">
-        <div className="flex bg-gray-100 dark:bg-gray-700 rounded-xl p-1">
+        <div className="flex bg-gray-100 rounded-xl p-1">
           {/* Sliding background indicator */}
           <div
-            className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white dark:bg-gray-800 rounded-lg shadow-md transition-all duration-300 ease-out ${
+            className={`absolute top-1 bottom-1 w-[calc(50%-4px)] bg-white rounded-lg shadow-md transition-all duration-300 ease-out ${
               tab === 'signup' ? 'translate-x-[calc(100%+4px)]' : 'translate-x-0'
             }`}
           />
@@ -47,8 +47,8 @@ const AuthCard: React.FC = () => {
             onClick={() => setTab('login')}
             className={`relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-300 ${
               tab === 'login'
-                ? 'text-primary-600 dark:text-primary-400'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                ? 'text-primary-600'
+                : 'text-gray-500 hover:text-gray-700'
             }`}
             type="button"
           >
@@ -60,8 +60,8 @@ const AuthCard: React.FC = () => {
             onClick={() => setTab('signup')}
             className={`relative z-10 flex-1 py-2.5 text-sm font-semibold rounded-lg transition-colors duration-300 ${
               tab === 'signup'
-                ? 'text-primary-600 dark:text-primary-400'
-                : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                ? 'text-primary-600'
+                : 'text-gray-500 hover:text-gray-700'
             }`}
             type="button"
           >
@@ -108,7 +108,7 @@ const AuthCard: React.FC = () => {
                 className="mt-1"
               />
             </div>
-            <Button type="submit" className="w-full" disabled={isLoading}>
+            <Button type="submit" className="w-full cursor-pointer" disabled={isLoading}>
               {isLoading ? <Spinner size="sm" /> : 'Sign In'}
             </Button>
           </form>
@@ -173,7 +173,7 @@ const AuthCard: React.FC = () => {
                 className="mt-1"
               />
             </div>
-            <Button type="submit" color="primary" className="w-full" disabled={isLoading}>
+            <Button type="submit" color="primary" className="w-full cursor-pointer" disabled={isLoading}>
               {isLoading ? <Spinner size="sm" /> : 'Sign Up'}
             </Button>
           </form>

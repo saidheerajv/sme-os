@@ -1,4 +1,4 @@
-import { IsString, IsBoolean, IsOptional, IsNumber, IsEnum, IsArray, ValidateNested } from 'class-validator';
+import { IsString, IsBoolean, IsOptional, IsNumber, IsEnum, IsArray, ValidateNested, IsIn } from 'class-validator';
 import { Type } from 'class-transformer';
 import { FieldType, DropdownOption } from '../../types/entity-field.type';
 
@@ -81,6 +81,6 @@ export class FieldDefinitionDto {
 
   // Form layout - span 1-4 columns
   @IsOptional()
-  @IsNumber()
-  span?: number;
+  @IsIn([1, 2, 3, 4])
+  span?: 1 | 2 | 3 | 4;
 }
