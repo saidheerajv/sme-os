@@ -2,6 +2,7 @@ import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { FaDatabase, FaUsers } from 'react-icons/fa';
 import type { EntityDefinition } from '../../types/entity.types';
+import { useAuth } from '../../contexts/AuthContext';
 
 interface SideMenuProps {
     isOpen: boolean;
@@ -10,12 +11,16 @@ interface SideMenuProps {
 }
 
 const navItems = [
-    { path: '/dashboard/users', label: 'Manage Users', icon: FaUsers },
-    { path: '/dashboard/entity-definitions', label: 'Manage Modules', icon: FaDatabase }
+    { path: '/dashboard/users', label: 'Manage Users', icon: FaUsers, adminOnly: true },
+    { path: '/dashboard/entity-definitions', label: 'Manage Modules', icon: FaDatabase, adminOnly: true }
 ];
 
 const SideMenu: React.FC<SideMenuProps> = ({ isOpen, onClose, entities }) => {
     const location = useLocation();
+    const { user } = useAuth();
+    const isAdmin = user?.role === 'admin';
+
+    const visibleNavItems = navItems.filter(item => !item.adminOnly || isAdmin);
 
     return (
         <>
@@ -66,7 +71,7 @@ const SideMenu: React.FC<SideMenuProps> = ({ isOpen, onClose, entities }) => {
 
                     <div className="mt-auto">
                         <ul className="space-y-2 font-medium">
-                            {navItems.map((item) => {
+                            {visibleNavItems.map((item) => {
                                 const isActive = location.pathname.includes(item.path);
                                 return (
                                     <li key={item.path}>
