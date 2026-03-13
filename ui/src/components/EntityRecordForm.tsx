@@ -250,7 +250,7 @@ const EntityRecordForm: React.FC<EntityRecordFormProps> = ({
                     <div className="grid grid-cols-4 gap-4 mb-6">
                         {entitySchema.fields.map(field => renderFormField(field))}
                     </div>
-                    <div className="flex justify-end gap-2 pt-4 border-t">
+                    <div className="flex justify-end gap-2 pt-3">
                         <Button color="gray" onClick={onClose}>
                             Cancel
                         </Button>

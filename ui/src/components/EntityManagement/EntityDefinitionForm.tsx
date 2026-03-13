@@ -503,7 +503,7 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
                 <label className="block text-xs font-medium text-gray-500 mb-1">Label</label>
                 <input
                   type="text"
-                  className={`w-full rounded-lg text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 ${errors[`${fieldKey}-option-${idx}-label`] ? 'border-red-500' : 'border-gray-300'}`}
+                  className={`w-full rounded-sm text-sm py-2 shadow-sm focus:border-primary-500 focus:ring-primary-500 ${errors[`${fieldKey}-option-${idx}-label`] ? 'border-red-500' : 'border-gray-300'}`}
                   placeholder="Display text"
                   value={option.label}
                   onChange={e => updateDropdownOption(field.id, idx, { label: e.target.value })}
@@ -516,7 +516,7 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
                 <label className="block text-xs font-medium text-gray-500 mb-1">Value</label>
                 <input
                   type="text"
-                  className={`w-full rounded-lg text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 ${errors[`${fieldKey}-option-${idx}-value`] ? 'border-red-500' : 'border-gray-300'}`}
+                  className={`w-full rounded-sm py-2 text-sm shadow-sm focus:border-primary-500 focus:ring-primary-500 ${errors[`${fieldKey}-option-${idx}-value`] ? 'border-red-500' : 'border-gray-300'}`}
                   placeholder="Stored value"
                   value={option.value}
                   onChange={e => updateDropdownOption(field.id, idx, { value: e.target.value })}
