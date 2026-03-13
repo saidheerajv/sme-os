@@ -1,6 +1,7 @@
-import { IsArray, ValidateNested, IsOptional } from 'class-validator';
+import { IsArray, ValidateNested, IsOptional, IsEnum, IsObject } from 'class-validator';
 import { Type } from 'class-transformer';
 import { FieldDefinitionDto } from './field-definition.dto';
+import { UIComponentType } from '../../types/entity-field.type';
 
 export class UpdateEntityDefinitionDto {
   @IsArray()
@@ -8,4 +9,12 @@ export class UpdateEntityDefinitionDto {
   @Type(() => FieldDefinitionDto)
   @IsOptional()
   fields?: FieldDefinitionDto[];
+
+  @IsOptional()
+  @IsEnum(UIComponentType)
+  uiComponent?: UIComponentType;
+
+  @IsOptional()
+  @IsObject()
+  uiConfig?: Record<string, any>;
 }

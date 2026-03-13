@@ -49,7 +49,22 @@ export interface FieldDefinition {
   span?: 1 | 2 | 3 | 4;
 }
 
+export enum UIComponentType {
+  DATATABLE = 'datatable',
+  KANBAN = 'kanban',
+}
+
+export interface KanbanConfig {
+  groupByField: string;
+  titleField: string;
+  descriptionField?: string;
+}
+
+export type UIConfig = KanbanConfig;
+
 export interface EntityDefinitionData {
   name: string;
   fields: FieldDefinition[];
+  uiComponent?: UIComponentType;
+  uiConfig?: UIConfig;
 }

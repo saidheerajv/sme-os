@@ -35,6 +35,8 @@ export class EntityDefinitionsService {
         tableName,
         organizationId,
         fields: dto.fields as any,
+        uiComponent: dto.uiComponent || 'datatable',
+        uiConfig: dto.uiConfig as any || undefined,
       },
     });
 
@@ -69,11 +71,14 @@ export class EntityDefinitionsService {
     const entity = await this.findOne(organizationId, name);
 
     // Update entity definition
+    const updateData: any = {};
+    if (dto.fields) updateData.fields = dto.fields as any;
+    if (dto.uiComponent !== undefined) updateData.uiComponent = dto.uiComponent;
+    if (dto.uiConfig !== undefined) updateData.uiConfig = dto.uiConfig as any;
+
     const updatedEntity = await this.prisma.entityDefinition.update({
       where: { id: entity.id },
-      data: {
-        fields: dto.fields as any,
-      },
+      data: updateData,
     });
 
     // Regenerate and cache validation schema with org context

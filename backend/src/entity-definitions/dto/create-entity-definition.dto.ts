@@ -1,6 +1,7 @@
-import { IsString, IsArray, ValidateNested, IsNotEmpty } from 'class-validator';
+import { IsString, IsArray, ValidateNested, IsNotEmpty, IsOptional, IsEnum, IsObject } from 'class-validator';
 import { Type } from 'class-transformer';
 import { FieldDefinitionDto } from './field-definition.dto';
+import { UIComponentType } from '../../types/entity-field.type';
 
 export class CreateEntityDefinitionDto {
   @IsString()
@@ -11,4 +12,12 @@ export class CreateEntityDefinitionDto {
   @ValidateNested({ each: true })
   @Type(() => FieldDefinitionDto)
   fields: FieldDefinitionDto[];
+
+  @IsOptional()
+  @IsEnum(UIComponentType)
+  uiComponent?: UIComponentType;
+
+  @IsOptional()
+  @IsObject()
+  uiConfig?: Record<string, any>;
 }

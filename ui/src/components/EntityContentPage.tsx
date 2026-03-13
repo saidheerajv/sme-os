@@ -4,8 +4,10 @@ import { Card, Button, Spinner, Alert } from 'flowbite-react';
 import { entityDefinitionsApi } from '../services/entityDefinitions.api';
 import { entitiesApi, type EntityRecord } from '../services/entities.api';
 import type { EntityDefinition } from '../types/entity.types';
+import { UIComponentType } from '../types/entity.types';
 import { HiPlus } from 'react-icons/hi';
 import DataTable from './EntityDisplayComponents/DataTable';
+import KanbanBoard from './EntityDisplayComponents/KanbanBoard';
 import EntityRecordForm from './EntityRecordForm';
 import SearchModule from './SearchModule/SearchModule';
 
@@ -157,6 +159,24 @@ const EntityContentPage: React.FC = () => {
                 />
             )}
 
+            {entitySchema.uiComponent === UIComponentType.KANBAN && entitySchema.uiConfig ? (
+                entityData.length === 0 ? (
+                    <Card>
+                        <div className="p-8 text-center text-gray-500">
+                            <p className="text-lg">No records found</p>
+                            <p className="text-sm mt-2">Click "Add New" to create your first record</p>
+                        </div>
+                    </Card>
+                ) : (
+                    <KanbanBoard
+                        data={entityData}
+                        schema={entitySchema}
+                        config={entitySchema.uiConfig}
+                        onEdit={handleEdit}
+                        onDelete={handleDelete}
+                    />
+                )
+            ) : (
             <Card>
                 {entityData.length === 0 ? (
                     <div className="p-8 text-center text-gray-500">
@@ -172,6 +192,7 @@ const EntityContentPage: React.FC = () => {
                     />
                 )}
             </Card>
+            )}
 
             {/* Create/Edit Modal */}
             <EntityRecordForm

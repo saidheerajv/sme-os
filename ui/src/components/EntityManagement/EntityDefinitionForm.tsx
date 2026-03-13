@@ -9,12 +9,12 @@ import {
   ToggleSwitch,
 } from 'flowbite-react';
 import { FaPlus, FaTrash, FaChevronDown, FaChevronUp, FaGripVertical, FaInfoCircle } from 'react-icons/fa';
-import type { EntityDefinition, FieldDefinition, DropdownOption } from '../../types/entity.types';
-import { FieldType } from '../../types/entity.types';
+import type { EntityDefinition, FieldDefinition, DropdownOption, KanbanConfig } from '../../types/entity.types';
+import { FieldType, UIComponentType } from '../../types/entity.types';
 
 interface Props {
   initialData?: EntityDefinition | null;
-  onSubmit: (data: { name: string; fields: FieldDefinition[] }) => void;
+  onSubmit: (data: { name: string; fields: FieldDefinition[]; uiComponent: UIComponentType; uiConfig?: KanbanConfig }) => void;
   onCancel: () => void;
 }
 
@@ -42,6 +42,12 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
   const [entityName, setEntityName] = useState('');
   const [fields, setFields] = useState<FieldFormData[]>([]);
   const [errors, setErrors] = useState<{ [key: string]: string }>({});
+  const [uiComponent, setUiComponent] = useState<UIComponentType>(UIComponentType.DATATABLE);
+  const [kanbanConfig, setKanbanConfig] = useState<KanbanConfig>({
+    groupByField: '',
+    titleField: '',
+    descriptionField: '',
+  });
 
   useEffect(() => {
     if (initialData) {
@@ -53,6 +59,14 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
         // Use displayName if available, otherwise derive from name
         displayName: field.displayName || field.name,
       })));
+      setUiComponent((initialData.uiComponent as UIComponentType) || UIComponentType.DATATABLE);
+      if (initialData.uiConfig) {
+        setKanbanConfig({
+          groupByField: initialData.uiConfig.groupByField || '',
+          titleField: initialData.uiConfig.titleField || '',
+          descriptionField: initialData.uiConfig.descriptionField || '',
+        });
+      }
     } else {
       // Start with one empty field
       addField();
@@ -162,6 +176,16 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
       }
     });
 
+    // Validate kanban config
+    if (uiComponent === UIComponentType.KANBAN) {
+      if (!kanbanConfig.groupByField) {
+        newErrors.kanbanGroupBy = 'Group By field is required for Kanban view';
+      }
+      if (!kanbanConfig.titleField) {
+        newErrors.kanbanTitle = 'Title field is required for Kanban view';
+      }
+    }
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -206,6 +230,14 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
 
         return cleanField;
       }),
+      uiComponent,
+      ...(uiComponent === UIComponentType.KANBAN ? {
+        uiConfig: {
+          groupByField: kanbanConfig.groupByField,
+          titleField: kanbanConfig.titleField,
+          ...(kanbanConfig.descriptionField ? { descriptionField: kanbanConfig.descriptionField } : {}),
+        },
+      } : {}),
     };
 
     onSubmit(formData);
@@ -535,6 +567,87 @@ const EntityDefinitionForm: React.FC<Props> = ({ initialData, onSubmit, onCancel
           <div className="text-xs text-red-600 mt-1">{errors.entityName}</div>
         )}
       </div>
+
+      {/* UI Component Selection */}
+      <div className="mb-6">
+        <label className="block text-sm font-medium text-gray-700 mb-1">UI Component</label>
+        <Select
+          value={uiComponent}
+          onChange={(e) => setUiComponent(e.target.value as UIComponentType)}
+        >
+          <option value={UIComponentType.DATATABLE}>Data Table</option>
+          <option value={UIComponentType.KANBAN}>Kanban Board</option>
+        </Select>
+        <p className="text-xs text-gray-500 mt-1">
+          Choose how records will be displayed. Data Table shows records in rows and columns. Kanban Board displays cards grouped by a status/category field.
+        </p>
+      </div>
+
+      {/* Kanban Configuration */}
+      {uiComponent === UIComponentType.KANBAN && (
+        <div className="mb-6 p-4 bg-purple-50 rounded-lg border border-purple-200">
+          <div className="text-sm font-semibold text-purple-700 mb-3 uppercase tracking-wide">Kanban Configuration</div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Group By Field <span className="text-red-500">*</span>
+              </label>
+              <Select
+                value={kanbanConfig.groupByField}
+                onChange={(e) => setKanbanConfig({ ...kanbanConfig, groupByField: e.target.value })}
+                color={errors.kanbanGroupBy ? 'failure' : 'gray'}
+              >
+                <option value="">Select field...</option>
+                {fields.filter(f => f.type === FieldType.DROPDOWN).map(f => (
+                  <option key={f.id} value={toCamelCase(f.displayName || '')}>
+                    {f.displayName || f.name}
+                  </option>
+                ))}
+              </Select>
+              {errors.kanbanGroupBy && (
+                <div className="text-xs text-red-600 mt-1">{errors.kanbanGroupBy}</div>
+              )}
+              <p className="text-xs text-gray-400 mt-1">Dropdown field whose values become the kanban columns</p>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">
+                Card Title Field <span className="text-red-500">*</span>
+              </label>
+              <Select
+                value={kanbanConfig.titleField}
+                onChange={(e) => setKanbanConfig({ ...kanbanConfig, titleField: e.target.value })}
+                color={errors.kanbanTitle ? 'failure' : 'gray'}
+              >
+                <option value="">Select field...</option>
+                {fields.filter(f => f.type === FieldType.STRING || f.type === FieldType.EMAIL).map(f => (
+                  <option key={f.id} value={toCamelCase(f.displayName || '')}>
+                    {f.displayName || f.name}
+                  </option>
+                ))}
+              </Select>
+              {errors.kanbanTitle && (
+                <div className="text-xs text-red-600 mt-1">{errors.kanbanTitle}</div>
+              )}
+              <p className="text-xs text-gray-400 mt-1">Displayed as the card heading</p>
+            </div>
+            <div>
+              <label className="block text-xs font-medium text-gray-600 mb-1">Card Description Field</label>
+              <Select
+                value={kanbanConfig.descriptionField || ''}
+                onChange={(e) => setKanbanConfig({ ...kanbanConfig, descriptionField: e.target.value || undefined })}
+              >
+                <option value="">None</option>
+                {fields.filter(f => f.type === FieldType.STRING).map(f => (
+                  <option key={f.id} value={toCamelCase(f.displayName || '')}>
+                    {f.displayName || f.name}
+                  </option>
+                ))}
+              </Select>
+              <p className="text-xs text-gray-400 mt-1">Optional text shown below the card title</p>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Fields Section */}
       <div className="flex items-center justify-between mb-3">

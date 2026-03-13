@@ -59,12 +59,29 @@ export interface FieldDefinition {
   span?: 1 | 2 | 3 | 4;
 }
 
+export const UIComponentType = {
+  DATATABLE: 'datatable',
+  KANBAN: 'kanban',
+} as const;
+
+export type UIComponentType = typeof UIComponentType[keyof typeof UIComponentType];
+
+export interface KanbanConfig {
+  groupByField: string;
+  titleField: string;
+  descriptionField?: string;
+}
+
+export type UIConfig = KanbanConfig;
+
 export interface EntityDefinition {
   id: string;
   name: string;
   tableName: string;
   organizationId: string;
   fields: FieldDefinition[];
+  uiComponent?: UIComponentType;
+  uiConfig?: UIConfig;
   searchFields?: SearchFieldConfig[];
   createdAt: string;
   updatedAt: string;
@@ -73,4 +90,6 @@ export interface EntityDefinition {
 export interface CreateEntityDefinitionDto {
   name: string;
   fields: FieldDefinition[];
+  uiComponent?: UIComponentType;
+  uiConfig?: UIConfig;
 }

@@ -3,7 +3,8 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, Alert } from 'flowbite-react';
 import EntityDefinitionForm from './EntityDefinitionForm';
 import { entityDefinitionsApi } from '../../services/entityDefinitions.api';
-import type { EntityDefinition, FieldDefinition } from '../../types/entity.types';
+import type { EntityDefinition, FieldDefinition, KanbanConfig } from '../../types/entity.types';
+import type { UIComponentType } from '../../types/entity.types';
 
 const EntityDefinitionFormPage: React.FC = () => {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ const EntityDefinitionFormPage: React.FC = () => {
   
   const [error, setError] = useState<string | null>(null);
 
-  const handleFormSubmit = async (formData: { name: string; fields: FieldDefinition[] }) => {
+  const handleFormSubmit = async (formData: { name: string; fields: FieldDefinition[]; uiComponent: UIComponentType; uiConfig?: KanbanConfig }) => {
     try {
       if (entityToEdit) {
         // Update existing entity
