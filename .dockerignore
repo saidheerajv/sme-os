@@ -1,0 +1,12 @@
+**/node_modules
+**/dist
+**/.env
+**/.env.*
+ui/dist
+backend/public
+backend/prisma/migrations/.gitkeep
+**/coverage
+**/*.log
+**/.git
+**/.DS_Store
+**/Thumbs.db
