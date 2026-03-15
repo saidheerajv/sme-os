@@ -1,0 +1,190 @@
+import { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+import { Card, Button, Spinner, Alert } from 'flowbite-react';
+import { entityDefinitionsApi } from '../../../services/entityDefinitions.api';
+import { entitiesApi, type EntityRecord } from '../../../services/entities.api';
+import type { EntityDefinition } from '../../../types/entity.types';
+import { HiPlus } from 'react-icons/hi';
+import KanbanBoard from './KanbanBoard';
+import EntityRecordForm from './EntityRecordForm';
+import SearchModule from './SearchModule';
+
+const KanbanContainer: React.FC = () => {
+
+    const { entityName } = useParams<{ entityName: string }>();
+    const [entitySchema, setEntitySchema] = useState<EntityDefinition | null>(null);
+    const [entityData, setEntityData] = useState<EntityRecord[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+    const [showModal, setShowModal] = useState(false);
+    const [editingRecord, setEditingRecord] = useState<EntityRecord | null>(null);
+    const [formData, setFormData] = useState<Record<string, any>>({});
+    const [searchQuery, setSearchQuery] = useState<string>('');
+
+    // Fetch entity schema and data
+    useEffect(() => {
+        if (!entityName) return;
+        
+        const fetchData = async () => {
+            setLoading(true);
+            setError(null);
+            try {
+                const [schema, response] = await Promise.all([
+                    entityDefinitionsApi.getByName(entityName),
+                    entitiesApi.getAll(entityName, searchQuery)
+                ]);
+
+                setEntitySchema(schema);
+                // Extract the actual data from each entity record
+                setEntityData(response.data.map((item: any) => ({
+                    id: item.id,
+                    ...item.data
+                })));
+            } catch (err: any) {
+                setError(err.response?.data?.message || 'Failed to load module data');
+            } finally {
+                setLoading(false);
+            }
+        };
+
+        fetchData();
+    }, [entityName, searchQuery]);
+
+    // Handle create/edit modal
+    const handleCreate = () => {
+        setEditingRecord(null);
+        setFormData({});
+        setShowModal(true);
+    };
+
+    const handleEdit = (record: EntityRecord) => {
+        setEditingRecord(record);
+        setFormData(record);
+        setShowModal(true);
+    };
+
+    const handleDelete = async (record: EntityRecord) => {
+        
+        if (!entityName || !confirm('Are you sure you want to delete this record?')) return;
+        
+        try {
+            await entitiesApi.delete(entityName, record.id);
+            setEntityData(prev => prev.filter(item => item.id !== record.id));
+        } catch (err: any) {
+            alert(err.response?.data?.message || 'Failed to delete record');
+        }
+    };
+
+
+
+    const handleSubmit = async (submittedFormData: Record<string, any>) => {
+        if (!entityName) return;
+
+        try {
+            if (editingRecord) {
+                const updated = await entitiesApi.update(entityName, editingRecord.id, submittedFormData);
+                // Extract data with id
+                const updatedData = { id: updated.id, ...updated.data };
+                setEntityData(prev => prev.map(item => item.id === editingRecord.id ? updatedData : item));
+            } else {
+                await entitiesApi.create(entityName, submittedFormData);
+                // Refresh data after creation
+                const response = await entitiesApi.getAll(entityName, searchQuery);
+                setEntityData(response.data.map((item: any) => ({
+                    id: item.id,
+                    ...item.data
+                })));
+            }
+            setShowModal(false);
+            setFormData({});
+        } catch (err: any) {
+            alert(err.response?.data?.message || 'Failed to save record');
+            throw err; // Re-throw to let form handle loading state
+        }
+    };
+
+    if (loading) {
+        return (
+            <div className="flex justify-center items-center h-96">
+                <Spinner size="xl" />
+            </div>
+        );
+    }
+
+    if (error) {
+        return (
+            <div className="max-w-6xl mx-auto mt-8 mb-8">
+                <Alert color="failure">
+                    <span className="font-medium">Error!</span> {error}
+                </Alert>
+            </div>
+        );
+    }
+
+    if (!entitySchema) {
+        return (
+            <div className="max-w-6xl mx-auto mt-8 mb-8">
+                <Alert color="warning">
+                    <span className="font-medium">Not Found!</span> Module schema not found.
+                </Alert>
+            </div>
+        );
+    }
+
+    // Get searchable fields
+    const searchableFields = entitySchema.fields.filter(field => field.enableSearch === true);
+
+    // Handle search
+    const handleSearch = (query: string) => {
+        setSearchQuery(query);
+    };
+
+    return (
+        <div className="max-w-7xl mx-auto mt-8 mb-8 px-4">
+            <div className="flex justify-between items-center mb-6">
+                <h1 className="text-xl font-semibold capitalize">{entityName}</h1>
+                <Button onClick={handleCreate}>
+                    <HiPlus className="mr-2 h-5 w-5" />
+                    Add New
+                </Button>
+            </div>
+
+            {/* Search Module */}
+            {searchableFields.length > 0 && (
+                <SearchModule 
+                    fields={searchableFields}
+                    onSearch={handleSearch}
+                />
+            )}
+
+            {entityData.length === 0 ? (
+                <Card>
+                    <div className="p-8 text-center text-gray-500">
+                        <p className="text-lg">No records found</p>
+                        <p className="text-sm mt-2">Click "Add New" to create your first record</p>
+                    </div>
+                </Card>
+            ) : (
+                <KanbanBoard
+                    data={entityData}
+                    schema={entitySchema}
+                    config={entitySchema.uiConfig!}
+                    onEdit={handleEdit}
+                    onDelete={handleDelete}
+                />
+            )}
+
+            {/* Create/Edit Modal */}
+            <EntityRecordForm
+                show={showModal}
+                onClose={() => setShowModal(false)}
+                onSubmit={handleSubmit}
+                entitySchema={entitySchema}
+                editingRecord={editingRecord}
+                initialData={formData}
+            />
+        </div>
+    );
+};
+
+export default KanbanContainer;

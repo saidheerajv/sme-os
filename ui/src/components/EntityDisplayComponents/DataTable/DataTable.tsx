@@ -10,8 +10,8 @@ import {
 import type { ColumnDef } from '@tanstack/react-table';
 import { Button } from 'flowbite-react';
 import { HiChevronLeft, HiChevronRight } from 'react-icons/hi';
-import type { EntityDefinition, FieldDefinition } from '../../types/entity.types';
-import type { EntityRecord } from '../../services/entities.api';
+import type { EntityDefinition, FieldDefinition } from '../../../types/entity.types';
+import type { EntityRecord } from '../../../services/entities.api';
 
 interface DataTableProps {
   data: EntityRecord[];

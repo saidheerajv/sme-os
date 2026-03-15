@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Button, Drawer, TextInput, Label, Checkbox, Spinner, Select } from 'flowbite-react';
-import type { EntityDefinition, FieldDefinition } from '../types/entity.types';
-import type { EntityRecord } from '../services/entities.api';
+import type { EntityDefinition, FieldDefinition } from '../../../types/entity.types';
+import type { EntityRecord } from '../../../services/entities.api';
 
 interface EntityRecordFormProps {
     show: boolean;

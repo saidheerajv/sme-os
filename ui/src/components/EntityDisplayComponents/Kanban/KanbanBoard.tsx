@@ -1,9 +1,9 @@
 import { useMemo, useState } from 'react';
 import { Button, Badge } from 'flowbite-react';
 import { HiPencil, HiTrash } from 'react-icons/hi';
-import type { EntityDefinition } from '../../types/entity.types';
-import type { EntityRecord } from '../../services/entities.api';
-import type { KanbanConfig } from '../../types/entity.types';
+import type { EntityDefinition } from '../../../types/entity.types';
+import type { EntityRecord } from '../../../services/entities.api';
+import type { KanbanConfig } from '../../../types/entity.types';
 
 interface KanbanBoardProps {
   data: EntityRecord[];
